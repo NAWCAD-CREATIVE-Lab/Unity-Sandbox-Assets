@@ -1,0 +1,52 @@
+{
+    "name": "gov.nawcad-creative-lab.sandbox-assets",
+    "version": "1.0.0",
+    "displayName": "Sandbox Assets",
+    "description": "Scriptable objects allowing for the creation of variables, references and events inside the Unity Asset folder.\n\nThe samples in this package are in order of dependency.",
+    "unity": "6000.0",
+    "dependencies": {
+      
+    },
+    "author": {
+      "name": "NAWCAD CREATIVE Lab",
+      "email": "christopher.r.bowersock.civ@us.navy.mil",
+      "url": "https://spork.fusion.navy.mil/creative/devops/unity-packages/utility-scripts.git"
+    },
+    "samples": [
+      {
+        "displayName": "Event Asset Listener Test",
+        "description": "Contains a test scene for the Asset Listener.",
+        "path": "Samples/01 Event Asset Listener Test"
+      },
+      {
+        "displayName": "Event Animation State Invoker Test",
+        "description": "Contains a test scene for the Animation State Invoker.",
+        "path": "Samples/02 Event Animation State Invoker Test"
+      },
+      {
+        "displayName": "Event Collider Invoker Test",
+        "description": "Contains a test scene for the Collider Invoker.",
+        "path": "Samples/02 Event Collider Invoker Test"
+      },
+      {
+        "displayName": "Event Scene Listener Test",
+        "description": "Contains a test scene for the Scene Listener.",
+        "path": "Samples/02 Event Scene Listener Test"
+      },
+      {
+        "displayName": "Event Button Invoker Test",
+        "description": "Contains a test scene for the Button Invoker.",
+        "path": "Samples/03 Event Button Invoker Test"
+      },
+      {
+        "displayName": "Input Action Processor Test",
+        "description": "Contains a test scene for the Input Action Processor script.",
+        "path": "Samples/03 Input Action Processor Test"
+      },
+      {
+        "displayName": "Application Controller Test",
+        "description": "Contains a test scene for the Application Controller script.",
+        "path": "Samples/04 Application Controller Test"
+      }
+    ]
+  }

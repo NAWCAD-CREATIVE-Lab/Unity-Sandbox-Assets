@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db144ecdceaa27d46a3d06cff71947c0, type: 3}
+  m_Name: Test Event Listener 1
+  m_EditorClassIdentifier: 
+  SandboxEvent: {fileID: 11400000, guid: 6dc01499fa01db44d8d1e844bfc0a57e, type: 2}
+  TargetPassThrough: 0
+  RestrictToTargets: []
+  Action:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: 542a410657ce2b347b0375f388043a52, type: 2}
+        m_TargetAssemblyTypeName: CREATIVE.SandboxAssets.SandboxEvent, gov.nawcad-creative-lab.sandbox-assets
+        m_MethodName: Invoke
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 11400000}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  ActionWithTarget:
+    m_PersistentCalls:
+      m_Calls: []
+  LinkEvent: 0
+  LinkedEvent: {fileID: 0}

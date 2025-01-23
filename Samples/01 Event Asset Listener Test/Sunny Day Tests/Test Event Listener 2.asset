@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db144ecdceaa27d46a3d06cff71947c0, type: 3}
+  m_Name: Test Event Listener 2
+  m_EditorClassIdentifier: 
+  SandboxEvent: {fileID: 11400000, guid: 542a410657ce2b347b0375f388043a52, type: 2}
+  TargetPassThrough: 0
+  RestrictToTargets: []
+  Action:
+    m_PersistentCalls:
+      m_Calls: []
+  ActionWithTarget:
+    m_PersistentCalls:
+      m_Calls: []
+  LinkEvent: 1
+  LinkedEvent: {fileID: 11400000, guid: 75e45ff0d4e6dd943886e056f13563b5, type: 2}
