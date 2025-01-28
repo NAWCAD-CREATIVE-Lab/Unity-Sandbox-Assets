@@ -4,5 +4,5 @@ Sandbox Assets can be read, written to and reacted to by Monobehaviour scripts i
 
 To edit or add to this package:
 1. Clone into the Packages folder of a Unity project
-2. Rename the folder created by git to gov.nawcad-creative-lab.materials-and-animations
+2. Rename the folder created by git to gov.nawcad-creative-lab.sandbox-assets
 3. Remove the ~ from the Samples folder name (do not commit or push this change)
