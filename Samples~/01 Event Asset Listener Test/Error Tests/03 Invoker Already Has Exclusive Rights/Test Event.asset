@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ebf20df90464d045838ef73449d51ca, type: 3}
   m_Name: Test Event
   m_EditorClassIdentifier: 
-  ExclusiveInvokerFromAssetFolder: {fileID: 11400000, guid: 8bb5b25cc333b6741825a59ac355ba06, type: 2}
+  ExclusiveInvokerFromAssetFolder: {fileID: 11400000, guid: 4f999b49dd78fc4448e3de2beeaba90a, type: 2}
   InvokersFromAssetFolder: []
   ListenersFromAssetFolder: []

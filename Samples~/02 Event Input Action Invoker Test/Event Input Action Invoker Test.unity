@@ -357,7 +357,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: -944628639613478452, guid: 504e8856c03fbae41859fa33fad20a59, type: 3}
+      - m_Target: {fileID: -944628639613478452, guid: b96fc7c665baf7846a179b5500c9f7da, type: 3}
         m_TargetAssemblyTypeName: UnityEngine.InputSystem.InputActionAsset, Unity.InputSystem
         m_MethodName: Enable
         m_Mode: 1
@@ -658,7 +658,7 @@ GameObject:
   - component: {fileID: 959853449}
   - component: {fileID: 959853448}
   m_Layer: 0
-  m_Name: Input Action Processor
+  m_Name: Input Action Invoker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -676,9 +676,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54cec069143c4b04a9a65c141391ab51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Action: {fileID: -3669445706877375615, guid: 504e8856c03fbae41859fa33fad20a59, type: 3}
+  Action: {fileID: -3669445706877375615, guid: b96fc7c665baf7846a179b5500c9f7da, type: 3}
   ActionStage: 1
-  Event: {fileID: 11400000, guid: 08f932bbfac7fbb4bb8b2c17edccc4c8, type: 2}
+  Event: {fileID: 11400000, guid: b759b1c45147bc04d82a7c8b9c239016, type: 2}
 --- !u!4 &959853449
 Transform:
   m_ObjectHideFlags: 0
@@ -973,7 +973,7 @@ MonoBehaviour:
 
 
     The T key and test event are linked through
-    the Input Action Processor in this scene.'
+    the Input Action Invoker in this scene.'
 --- !u!222 &1950075515
 CanvasRenderer:
   m_ObjectHideFlags: 0

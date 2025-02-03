@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db144ecdceaa27d46a3d06cff71947c0, type: 3}
   m_Name: Test Event Listener 2
   m_EditorClassIdentifier: 
-  SandboxEvent: {fileID: 11400000, guid: 542a410657ce2b347b0375f388043a52, type: 2}
+  EventToListenFor: {fileID: 11400000, guid: 375dbbd9da690f64186f9c0a1f0888e9, type: 2}
   TargetPassThrough: 0
   RestrictToTargets: []
   Action:
@@ -22,4 +22,4 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   LinkEvent: 1
-  LinkedEvent: {fileID: 11400000, guid: 75e45ff0d4e6dd943886e056f13563b5, type: 2}
+  LinkedEvent: {fileID: 11400000, guid: ca627663a086c224599dfbe54a601615, type: 2}

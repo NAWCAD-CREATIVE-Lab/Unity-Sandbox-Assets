@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ebf20df90464d045838ef73449d51ca, type: 3}
   m_Name: Test Event 2
   m_EditorClassIdentifier: 
-  ExclusiveInvokerFromAssetFolder: {fileID: 11400000, guid: 2f1d4491cfbb9e2408db1a314c98bc28, type: 2}
+  ExclusiveInvokerFromAssetFolder: {fileID: 11400000, guid: 0a00b30610ff1154f8a4e8dacf5f6f73, type: 2}
   InvokersFromAssetFolder: []
   ListenersFromAssetFolder:
-  - {fileID: 11400000, guid: d1e360923118fe64bb17a6acfe69516a, type: 2}
+  - {fileID: 11400000, guid: cfd7cf757c52a0340abee16f4f60072a, type: 2}

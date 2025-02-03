@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ExclusiveInvokerFromAssetFolder: {fileID: 0}
   InvokersFromAssetFolder:
-  - {fileID: 11400000, guid: d1e360923118fe64bb17a6acfe69516a, type: 2}
+  - {fileID: 11400000, guid: cfd7cf757c52a0340abee16f4f60072a, type: 2}
   ListenersFromAssetFolder: []

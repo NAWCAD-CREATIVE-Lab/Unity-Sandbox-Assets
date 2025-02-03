@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db144ecdceaa27d46a3d06cff71947c0, type: 3}
   m_Name: Test Event Listener 1
   m_EditorClassIdentifier: 
-  SandboxEvent: {fileID: 11400000, guid: 6dc01499fa01db44d8d1e844bfc0a57e, type: 2}
+  EventToListenFor: {fileID: 11400000, guid: 48cff42389d5e3249bee76507687b982, type: 2}
   TargetPassThrough: 0
   RestrictToTargets: []
   Action:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400000, guid: 542a410657ce2b347b0375f388043a52, type: 2}
+      - m_Target: {fileID: 11400000, guid: 375dbbd9da690f64186f9c0a1f0888e9, type: 2}
         m_TargetAssemblyTypeName: CREATIVE.SandboxAssets.SandboxEvent, gov.nawcad-creative-lab.sandbox-assets
         m_MethodName: Invoke
         m_Mode: 2

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ebf20df90464d045838ef73449d51ca, type: 3}
   m_Name: Started Moving in a Square
   m_EditorClassIdentifier: 
-  ExclusiveInvokerFromAssetFolder: {fileID: 9100000, guid: 4d22c955a4c6ac04f8ef91f821446ae0, type: 2}
+  ExclusiveInvokerFromAssetFolder: {fileID: 9100000, guid: 7bc3cc8469b8e8944bf9be2637fc2a16, type: 2}
   InvokersFromAssetFolder: []
   ListenersFromAssetFolder: []

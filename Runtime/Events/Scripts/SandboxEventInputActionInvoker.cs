@@ -17,7 +17,7 @@ namespace CREATIVE.SandboxAssets
 		This component listens for a particular Input Action from the
 		project-wide Input Actions and links it to a Sandbox Event.
 	*/
-	public class InputActionProcessor : MonoBehaviour
+	public class EventInputActionInvoker : MonoBehaviour
 	{
 		/**
 			A reference to the InputAction that should be listened for.

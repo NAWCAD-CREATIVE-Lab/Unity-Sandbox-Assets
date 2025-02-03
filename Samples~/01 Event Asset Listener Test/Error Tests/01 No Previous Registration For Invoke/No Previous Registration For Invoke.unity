@@ -202,7 +202,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400000, guid: cc3cb1767ce5ce7459b0f28c7769d696, type: 2}
+      - m_Target: {fileID: 11400000, guid: a74ca4aa832500b428d7a74dfc0e1574, type: 2}
         m_TargetAssemblyTypeName: CREATIVE.SandboxAssets.SandboxEvent, gov.nawcad-creative-lab.sandbox-assets
         m_MethodName: Invoke
         m_Mode: 2

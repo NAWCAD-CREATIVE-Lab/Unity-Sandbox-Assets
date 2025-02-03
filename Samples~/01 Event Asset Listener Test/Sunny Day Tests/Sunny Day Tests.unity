@@ -922,7 +922,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400000, guid: 6dc01499fa01db44d8d1e844bfc0a57e, type: 2}
+      - m_Target: {fileID: 11400000, guid: 48cff42389d5e3249bee76507687b982, type: 2}
         m_TargetAssemblyTypeName: CREATIVE.SandboxAssets.SandboxEvent, gov.nawcad-creative-lab.sandbox-assets
         m_MethodName: AddInvoker
         m_Mode: 2
@@ -934,7 +934,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: 6dc01499fa01db44d8d1e844bfc0a57e, type: 2}
+      - m_Target: {fileID: 11400000, guid: 48cff42389d5e3249bee76507687b982, type: 2}
         m_TargetAssemblyTypeName: CREATIVE.SandboxAssets.SandboxEvent, gov.nawcad-creative-lab.sandbox-assets
         m_MethodName: Invoke
         m_Mode: 2
@@ -946,7 +946,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: 6dc01499fa01db44d8d1e844bfc0a57e, type: 2}
+      - m_Target: {fileID: 11400000, guid: 48cff42389d5e3249bee76507687b982, type: 2}
         m_TargetAssemblyTypeName: CREATIVE.SandboxAssets.SandboxEvent, gov.nawcad-creative-lab.sandbox-assets
         m_MethodName: DropInvoker
         m_Mode: 2

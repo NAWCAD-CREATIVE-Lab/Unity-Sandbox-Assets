@@ -630,7 +630,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6466bf0b46d90394c989861e3fa6fd73, type: 2}
+  - {fileID: 2100000, guid: 216c568ff6072be4da7e44bdc40bc4be, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1122,7 +1122,7 @@ Animator:
   m_GameObject: {fileID: 1248320093}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 5be51f4c7279c0b4aa1543b479b2129e, type: 2}
+  m_Controller: {fileID: 9100000, guid: 3cd15b6148f961d49b378db066acdb1e, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -1146,10 +1146,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4678234585027e44780ad4f56be20c6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CollisionEnterEvent: {fileID: 11400000, guid: af87331989c99184999f12a7fc0e8edc, type: 2}
-  CollisionExitEvent: {fileID: 11400000, guid: 050de5f7ca248a144ac7554dce9e267d, type: 2}
-  TriggerEnterEvent: {fileID: 11400000, guid: 2d76740c65aa34e47ab0aa635f0fe6e3, type: 2}
-  TriggerExitEvent: {fileID: 11400000, guid: fd732696b3b3d4d43820cdcc5ffccc27, type: 2}
+  CollisionEnterEvent: {fileID: 11400000, guid: 320cad2b533db3c46a990b1248d10535, type: 2}
+  CollisionExitEvent: {fileID: 11400000, guid: 7536fa4e61ce1124399267ef29c186c4, type: 2}
+  TriggerEnterEvent: {fileID: 11400000, guid: 560df55daa66ee64e9219e93c2075e30, type: 2}
+  TriggerExitEvent: {fileID: 11400000, guid: 4f54d761d65b5724fad1c65138a49457, type: 2}
 --- !u!54 &1248320100
 Rigidbody:
   m_ObjectHideFlags: 0

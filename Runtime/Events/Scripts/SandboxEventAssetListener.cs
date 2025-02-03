@@ -19,7 +19,9 @@ namespace CREATIVE.SandboxAssets
 		/**
 			The SandboxEvent being listened for
 		*/
-		public SandboxEvent Event { get; private set; }
+		[field: SerializeField]
+		private SandboxEvent EventToListenFor;
+		public SandboxEvent Event { get { return EventToListenFor; } }
 
 		/**
 			The Object that is listenening, returns this
@@ -119,13 +121,7 @@ namespace CREATIVE.SandboxAssets
 				
 				serializedObject.Update();
 
-				listener.Event = EditorGUILayout.ObjectField
-				(
-					"Event",
-					listener.Event,
-					typeof(SandboxEvent),
-					false
-				) as SandboxEvent;
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.EventToListenFor)));
 				
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.LinkEvent)));
 

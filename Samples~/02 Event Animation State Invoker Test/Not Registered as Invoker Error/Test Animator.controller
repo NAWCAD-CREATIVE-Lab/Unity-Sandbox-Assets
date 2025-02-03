@@ -83,5 +83,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5b283c03896f5a43bbf45dc8a617f6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EventOnStateEnter: {fileID: 11400000, guid: fdca678b0ab606d4cb49b78aeb49fb8a, type: 2}
+  EventOnStateEnter: {fileID: 11400000, guid: 02b76106d4cf25e4d99ee58042f05c6b, type: 2}
   EventOnStateExit: {fileID: 0}
