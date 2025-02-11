@@ -1,0 +1,34 @@
+{
+    "name": "Test Input Actions",
+    "maps": [
+        {
+            "name": "Debug",
+            "id": "27f3567c-1732-4e47-b284-e0b4b02e293c",
+            "actions": [
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "438d35bd-1063-4ff8-8839-9044feb29a02",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "25b7e5ec-c9dc-46fe-9c69-e42639b6d172",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
