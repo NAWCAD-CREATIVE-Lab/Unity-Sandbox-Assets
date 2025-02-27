@@ -1024,6 +1024,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4d16a34f4d4d224ab303639c204fd12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CursorMoveActions:
+  - {fileID: -7905296094924049029, guid: f3df6d9796a53bd49a05452d452544fa, type: 3}
+  - {fileID: 6629502101741821384, guid: f3df6d9796a53bd49a05452d452544fa, type: 3}
   InteractAction: {fileID: -6220130846384993116, guid: f3df6d9796a53bd49a05452d452544fa, type: 3}
   InteractEvent: {fileID: 11400000, guid: 5e67eb86178b8c6448fb27c7e7edd5f6, type: 2}
   LookEvent: {fileID: 11400000, guid: 0e3c0bb84da6b7c43abca09f48ab4b41, type: 2}

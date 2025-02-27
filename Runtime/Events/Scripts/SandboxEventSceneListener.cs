@@ -195,7 +195,7 @@ namespace CREATIVE.SandboxAssets
 					return new SandboxEventDelegateListener
 					(
 						sandboxEvent, gameObject,
-						(target)=> { LinkedEvent.Invoke(gameObject, target); },
+						(target)=> { LinkedEvent.Invoke(gameObject, target); return false; },
 						RestrictToTargets
 					);
 				
@@ -203,7 +203,7 @@ namespace CREATIVE.SandboxAssets
 					return new SandboxEventDelegateListener
 					(
 						sandboxEvent, gameObject,
-						(target)=> { LinkedEvent.Invoke(gameObject); },
+						(target)=> { LinkedEvent.Invoke(gameObject); return false; },
 						RestrictToTargets
 					);
 			}
@@ -214,7 +214,7 @@ namespace CREATIVE.SandboxAssets
 					return new SandboxEventDelegateListener
 					(
 						sandboxEvent, gameObject,
-						(target)=> { ActionWithTarget.Invoke(target); },
+						(target)=> { ActionWithTarget.Invoke(target); return false; },
 						RestrictToTargets
 					);
 				
@@ -222,7 +222,7 @@ namespace CREATIVE.SandboxAssets
 					return new SandboxEventDelegateListener
 					(
 						sandboxEvent, gameObject,
-						(target)=> { Action.Invoke(); },
+						(target)=> { Action.Invoke(); return false; },
 						RestrictToTargets
 					);
 			}

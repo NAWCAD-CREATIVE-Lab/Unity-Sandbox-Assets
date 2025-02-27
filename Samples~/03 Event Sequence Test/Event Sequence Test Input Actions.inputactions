@@ -1,14 +1,14 @@
 {
-    "name": "Test Input Actions",
+    "name": "Event Sequence Test Input Actions",
     "maps": [
         {
-            "name": "Debug",
-            "id": "27f3567c-1732-4e47-b284-e0b4b02e293c",
+            "name": "User",
+            "id": "889d478e-daed-4ab6-a408-ded07ee46f31",
             "actions": [
                 {
                     "name": "Interact",
                     "type": "Button",
-                    "id": "438d35bd-1063-4ff8-8839-9044feb29a02",
+                    "id": "a56686dc-1040-41fd-a762-d08d212bb442",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -17,7 +17,7 @@
                 {
                     "name": "Look Horizontal",
                     "type": "Value",
-                    "id": "d4ab1b7e-bc08-491f-873e-66b71c9178ed",
+                    "id": "59df16a3-e899-463f-b4b3-3fdd32909a43",
                     "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
@@ -26,7 +26,7 @@
                 {
                     "name": "Look Vertical",
                     "type": "Value",
-                    "id": "c52bab14-617b-4567-be71-598d39810539",
+                    "id": "0d0cff94-191c-478a-8cee-cbc48a1f3bab",
                     "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
@@ -36,7 +36,7 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "25b7e5ec-c9dc-46fe-9c69-e42639b6d172",
+                    "id": "d6e7240a-7c27-4931-ac59-49c681e5bcd0",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
@@ -47,7 +47,7 @@
                 },
                 {
                     "name": "",
-                    "id": "bb6faa6f-5a1c-4b46-a444-a86b8ad2f197",
+                    "id": "e61f337c-fff1-4d03-8937-a4403c4e4d7f",
                     "path": "<Mouse>/delta/x",
                     "interactions": "",
                     "processors": "",
@@ -58,7 +58,7 @@
                 },
                 {
                     "name": "",
-                    "id": "5b5194c9-d0c7-4714-8105-d9565256412e",
+                    "id": "62f5b9c0-63cc-4805-a8ba-70ffc555a686",
                     "path": "<Mouse>/delta/y",
                     "interactions": "",
                     "processors": "",

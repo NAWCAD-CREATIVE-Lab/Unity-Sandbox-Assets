@@ -44,6 +44,11 @@ namespace CREATIVE.SandboxAssets
 		public  IEnumerable<SandboxEventListener>	ListenersFromScene 
 			{ get { return new List<SandboxEventListener>(listenersFromScene); } }
 		
+		private bool invokeLock = false;
+
+		private List<SandboxEventListener> listenersFromSceneToAdd = new List<SandboxEventListener>();
+		private List<SandboxEventListener> listenersFromSceneToRemove = new List<SandboxEventListener>();
+		
 #if UNITY_EDITOR
 		/**
 			Custom editor for the SandboxEvent.
@@ -164,36 +169,51 @@ namespace CREATIVE.SandboxAssets
 				
 				Debug.Log(debugMessage);
 
-				for (int i=(listenersFromScene.Count-1); i>=0; i--)
+				invokeLock = true;
+
+				foreach (SandboxEventListener listenerFromScene in listenersFromScene)
 				{
 					if (target==null)
 					{
-						if (listenersFromScene[i].Invoke())
-							listenersFromScene.RemoveAt(i);
+						if (listenerFromScene.Invoke())
+							listenersFromSceneToRemove.Add(listenerFromScene);
 					}
 					
-					else if (listenersFromScene[i].Invoke(target))
-						listenersFromScene.RemoveAt(i);
+					else if (listenerFromScene.Invoke(target))
+						listenersFromSceneToRemove.Add(listenerFromScene);
 				}
 				
-				for (int i=(ListenersFromAssetFolder.Count-1); i>=0; i--)
+				List<SandboxEventAssetListener> listenersFromAssetFolderToRemove = new List<SandboxEventAssetListener>();
+				foreach (SandboxEventAssetListener listenerFromAssetFolder in ListenersFromAssetFolder)
 				{
-					if (ListenersFromAssetFolder[i].Event != this)
+					if (listenerFromAssetFolder.Event != this)
 						Debug.LogError
 						(
-							"Cannot invoke listener \"" + ListenersFromAssetFolder[i].name + "\"" +
+							"Cannot invoke listener \"" + listenerFromAssetFolder.name + "\"" +
 							" as it is not a listener for this event."
 						);
 					
 					else if (target == null)
 					{
-						if (ListenersFromAssetFolder[i].Invoke(target))
-							ListenersFromAssetFolder.RemoveAt(i);
+						if (listenerFromAssetFolder.Invoke(target))
+							listenersFromAssetFolderToRemove.Add(listenerFromAssetFolder);
+						
 					}
 
-					else if (ListenersFromAssetFolder[i].Invoke(target))
-						ListenersFromAssetFolder.RemoveAt(i);
+					else if (listenerFromAssetFolder.Invoke(target))
+						listenersFromAssetFolderToRemove.Add(listenerFromAssetFolder);
 				}
+
+				foreach (SandboxEventListener listenerFromSceneToRemove in listenersFromSceneToRemove)
+					listenersFromScene.Remove(listenerFromSceneToRemove);
+				
+				foreach (SandboxEventListener listenerFromSceneToAdd in listenersFromSceneToAdd)
+					listenersFromScene.Add(listenerFromSceneToAdd);
+				
+				foreach (SandboxEventAssetListener listenerFromAssetFolderToRemove in listenersFromAssetFolderToRemove)
+					ListenersFromAssetFolder.Remove(listenerFromAssetFolderToRemove);
+				
+				invokeLock = false;
 			}
 		}
 
@@ -326,7 +346,12 @@ namespace CREATIVE.SandboxAssets
 					GameObject listeningObject = listener.ListeningObject as GameObject;
 
 					if (listeningObject.scene.name!=null && listeningObject.scene.rootCount!=0)
-					listenersFromScene.Add(listener);
+					{
+						if (invokeLock)
+							listenersFromSceneToAdd.Add(listener);
+						else
+							listenersFromScene.Add(listener);
+					}
 				}
 			}
 		}
@@ -369,7 +394,10 @@ namespace CREATIVE.SandboxAssets
 					"listener"
 				);
 			
-			listenersFromScene.Remove(listener);
+			if (invokeLock)
+				listenersFromSceneToRemove.Add(listener);
+			else
+				listenersFromSceneToRemove.Add(listener);
 		}
 	}
 }

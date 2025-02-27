@@ -5,7 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace CREATIVE.SandboxAssets
 {
@@ -27,6 +30,16 @@ namespace CREATIVE.SandboxAssets
 	[RequireComponent(typeof(PhysicsRaycaster))]
 	public class SandboxEventCursorInvoker : MonoBehaviour
 	{
+		/**
+			The input that will indicate the cursor has moved.
+
+			Raycasts to check for focus on a new object will only be performed
+			after these actions.
+		*/
+		[field: SerializeField]
+		private List<InputActionReference> CursorMoveActions;
+		private List<InputActionReference> registeredCursorMoveActions;
+		
 		/**
 			The input that will be understood as "interacting" with an object in
 			the scene.
@@ -75,6 +88,8 @@ namespace CREATIVE.SandboxAssets
 			{
 				serializedObject.Update();
 
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(CursorMoveActions)));
+
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(InteractAction)));
 
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(InteractEvent)));
@@ -108,21 +123,39 @@ namespace CREATIVE.SandboxAssets
 		{
 			UnRegister();
 
-			if (InteractEvent == null)
-				throw new InvalidOperationException("InteractEvent Must be populated prior to start of scene.");
-			
-			if (LookEvent == null)
-				throw new InvalidOperationException("ObjectLookEvent Must be populated prior to start of scene.");
-				
 			if (Application.isPlaying && isActiveAndEnabled)
 			{
-				InteractEvent.AddInvoker(gameObject);
+				if (InteractEvent == null)
+					throw new InvalidOperationException("InteractEvent Must be populated prior to start of scene.");
+				
+				if (LookEvent == null)
+					throw new InvalidOperationException("ObjectLookEvent Must be populated prior to start of scene.");
+					
+				if (Application.isPlaying && isActiveAndEnabled)
+				{
+					registeredCursorMoveActions = new List<InputActionReference>();
 
-				LookEvent.AddInvoker(gameObject);
-				
-				InteractAction.action.performed += Interact;
-				
-				registered = true;
+					foreach (InputActionReference inputActionReference in CursorMoveActions)
+					{
+						if (inputActionReference!=null)
+						{
+							registeredCursorMoveActions.Add(inputActionReference);
+							inputActionReference.action.performed += Look;
+						}
+					}
+
+					if (registeredCursorMoveActions.Count == 0)
+						throw new InvalidOperationException
+							("CursorMoveActions must be populated prior to the start of the scene.");
+					
+					InteractEvent.AddInvoker(gameObject);
+
+					LookEvent.AddInvoker(gameObject);
+					
+					InteractAction.action.performed += Interact;
+					
+					registered = true;
+				}
 			}
 		}
 
@@ -135,6 +168,9 @@ namespace CREATIVE.SandboxAssets
 				LookEvent.DropInvoker(gameObject);
 				
 				InteractAction.action.performed -= Interact;
+
+				foreach (InputActionReference inputActionReference in CursorMoveActions)
+					inputActionReference.action.performed -= Look;
 				
 				registered = false;
 			}
@@ -146,7 +182,7 @@ namespace CREATIVE.SandboxAssets
 				InteractEvent.Invoke(gameObject, CurrentlyLooking);
 		}
 
-		void Update ()
+		private void Look(InputAction.CallbackContext context)
 		{
 			List<RaycastResult> raycastResults = new List<RaycastResult>();
 

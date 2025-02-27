@@ -1,12 +1,9 @@
 {
   "name": "gov.nawcad-creative-lab.sandbox-assets",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "displayName": "Sandbox Assets",
   "description": "Scriptable objects allowing for the creation of variables, references and events inside the Unity Asset folder.\n\nThe samples in this package are in order of dependency.",
   "unity": "6000.0",
-  "dependencies": {
-    
-  },
   "author": {
     "name": "NAWCAD CREATIVE Lab",
     "email": "christopher.r.bowersock.civ@us.navy.mil",
@@ -52,6 +49,11 @@
       "displayName": "Event Cursor Invoker Test",
       "description": "Contains a test scene for the Event Cursor Invoker script.",
       "path": "Samples~/02 Event Cursor Invoker Test"
+    },
+    {
+      "displayName": "Event Sequence Test",
+      "description": "Contains a test scene for the Event Sequence script.",
+      "path": "Samples~/03 Event Sequence Test"
     }
   ]
 }

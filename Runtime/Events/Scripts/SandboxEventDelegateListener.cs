@@ -25,7 +25,7 @@ namespace CREATIVE.SandboxAssets
 			The method to call when the SandboxEvent is invoked must have a
 			signature matching this delegate.
 		*/
-		public delegate void SandboxEventHandler(UnityEngine.Object target);
+		public delegate bool SandboxEventHandler(UnityEngine.Object target);
 
 		private SandboxEventHandler handler;
 
@@ -115,17 +115,17 @@ namespace CREATIVE.SandboxAssets
 		
 		public bool Invoke(UnityEngine.Object target)
 		{
-			if (listening)
+			bool passesTargetFilter = TargetFilter==null;
+
+			if (TargetFilter!=null)
+				foreach (UnityEngine.Object targetMatch in TargetFilter)
+					if (targetMatch == target)
+						passesTargetFilter = true;
+			
+			if (listening && passesTargetFilter && handler(target))
 			{
-				if (TargetFilter==null)
-					handler(target);
-				
-				else
-				{
-					foreach (UnityEngine.Object targetMatch in TargetFilter)
-						if (target==targetMatch)
-							handler(target);
-				}
+				listening = false;
+				return true;
 			}
 
 			return false;
