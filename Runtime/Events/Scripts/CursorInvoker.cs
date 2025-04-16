@@ -10,7 +10,7 @@ using UnityEngine.EventSystems;
 using UnityEditor;
 #endif
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		This class invokes events when the cursor passes over, and interacts
@@ -28,7 +28,7 @@ namespace CREATIVE.SandboxAssets
 	*/
 	[RequireComponent(typeof(Camera))]
 	[RequireComponent(typeof(PhysicsRaycaster))]
-	public class SandboxEventCursorInvoker : MonoBehaviour
+	public class CursorInvoker : MonoBehaviour
 	{
 		/**
 			The input that will indicate the cursor has moved.
@@ -81,7 +81,7 @@ namespace CREATIVE.SandboxAssets
 		/**
 			Custom editor for the SandboxEventCursorInvoker Monobehaviour 
 		*/
-		[CustomEditor(typeof(SandboxEventCursorInvoker))]
+		[CustomEditor(typeof(CursorInvoker))]
 		public class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()

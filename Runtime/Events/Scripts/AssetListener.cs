@@ -8,13 +8,13 @@ using UnityEngine.Events;
 using UnityEditor;
 #endif
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		A listener for SandboxEvents that can reside in the asset folder
 	*/
 	[CreateAssetMenu(fileName = "Event Listener", menuName = "NAWCAD CREATIVE Lab/Sandbox Assets/Event Listener")]
-	public class SandboxEventAssetListener : ScriptableObject, SandboxEventListener
+	public class AssetListener : ScriptableObject, Listener
 	{
 		/**
 			The SandboxEvent being listened for
@@ -110,33 +110,33 @@ namespace CREATIVE.SandboxAssets
 
 #if UNITY_EDITOR
 		/**
-			A custom editor for SandboxEventAssetListener.
+			A custom editor for AssetListener.
 		*/
-		[CustomEditor(typeof(SandboxEventAssetListener))]
+		[CustomEditor(typeof(AssetListener))]
 		public class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()
 			{
-				SandboxEventAssetListener listener = target as SandboxEventAssetListener;
+				AssetListener listener = target as AssetListener;
 				
 				serializedObject.Update();
 
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.EventToListenFor)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.EventToListenFor)));
 				
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.LinkEvent)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.LinkEvent)));
 
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.TargetPassThrough)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.TargetPassThrough)));
 				
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.RestrictToTargets)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.RestrictToTargets)));
 
 				if (listener.LinkEvent)
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.LinkedEvent)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.LinkedEvent)));
 				else
 				{
 					if (listener.TargetPassThrough)
-						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.ActionWithTarget)));
+						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.ActionWithTarget)));
 					else
-						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventAssetListener.Action)));
+						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.Action)));
 				}
 				
 				serializedObject.ApplyModifiedProperties();

@@ -7,12 +7,12 @@ using UnityEngine.Events;
 using UnityEditor;
 #endif
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		A Sandbox Event Listener that can be attached to a GameObject.
 	*/
-	public class SandboxEventSceneListener : MonoBehaviour
+	public class SceneListener : MonoBehaviour
 	{
 		/**
 			If enabled, the user will be able to set a list of Events to be
@@ -69,38 +69,38 @@ namespace CREATIVE.SandboxAssets
 
 #if UNITY_EDITOR
 		/**
-			A custom editor for the SandboxEventSceneListener.
+			A custom editor for the SceneListener.
 		*/
-		[CustomEditor(typeof(SandboxEventSceneListener))]
+		[CustomEditor(typeof(SceneListener))]
 		private class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()
 			{
-				SandboxEventSceneListener listener = target as SandboxEventSceneListener;
+				SceneListener listener = target as SceneListener;
 				
 				serializedObject.Update();
 				
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.MultipleEvents)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.MultipleEvents)));
 				
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.LinkEvent)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.LinkEvent)));
 
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.TargetPassThrough)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.TargetPassThrough)));
 
 				if (listener.MultipleEvents)
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.Events)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.Events)));
 				else
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.Event)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.Event)));
 				
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.RestrictToTargets)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.RestrictToTargets)));
 
 				if (listener.LinkEvent)
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.LinkedEvent)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.LinkedEvent)));
 				else
 				{
 					if (listener.TargetPassThrough)
-						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.ActionWithTarget)));
+						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.ActionWithTarget)));
 					else
-						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventSceneListener.Action)));
+						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.Action)));
 				}
 				
 				serializedObject.ApplyModifiedProperties();
@@ -110,7 +110,7 @@ namespace CREATIVE.SandboxAssets
 
 		private SandboxEvent linkedEvent = null;
 
-		private List<SandboxEventDelegateListener> listeners = new List<SandboxEventDelegateListener>();
+		private List<DelegateListener> listeners = new List<DelegateListener>();
 
 		private bool listening = false;
 
@@ -125,7 +125,7 @@ namespace CREATIVE.SandboxAssets
 		{
 			UnRegister();
 
-			SandboxEventDelegateListener listener = null;
+			DelegateListener listener = null;
 
 			if (Application.isPlaying && isActiveAndEnabled)
 			{
@@ -172,7 +172,7 @@ namespace CREATIVE.SandboxAssets
 		{
 			if (listening==true)
 			{
-				foreach (SandboxEventDelegateListener listener in listeners)
+				foreach (DelegateListener listener in listeners)
 					listener.Disable();
 				
 				listeners.Clear();
@@ -187,12 +187,12 @@ namespace CREATIVE.SandboxAssets
 			}
 		}
 
-		private SandboxEventDelegateListener CreateListener(SandboxEvent sandboxEvent)
+		private DelegateListener CreateListener(SandboxEvent sandboxEvent)
 		{
 			if (LinkEvent)
 			{
 				if (TargetPassThrough)
-					return new SandboxEventDelegateListener
+					return new DelegateListener
 					(
 						sandboxEvent, gameObject,
 						(target)=> { LinkedEvent.Invoke(gameObject, target); return false; },
@@ -200,7 +200,7 @@ namespace CREATIVE.SandboxAssets
 					);
 				
 				else
-					return new SandboxEventDelegateListener
+					return new DelegateListener
 					(
 						sandboxEvent, gameObject,
 						(target)=> { LinkedEvent.Invoke(gameObject); return false; },
@@ -211,7 +211,7 @@ namespace CREATIVE.SandboxAssets
 			else
 			{
 				if (TargetPassThrough)
-					return new SandboxEventDelegateListener
+					return new DelegateListener
 					(
 						sandboxEvent, gameObject,
 						(target)=> { ActionWithTarget.Invoke(target); return false; },
@@ -219,7 +219,7 @@ namespace CREATIVE.SandboxAssets
 					);
 				
 				else
-					return new SandboxEventDelegateListener
+					return new DelegateListener
 					(
 						sandboxEvent, gameObject,
 						(target)=> { Action.Invoke(); return false; },

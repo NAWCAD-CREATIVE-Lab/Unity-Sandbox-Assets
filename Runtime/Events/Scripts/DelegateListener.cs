@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		A listener for SandboxEvents that uses the C# delegate system and
@@ -11,9 +11,10 @@ namespace CREATIVE.SandboxAssets
 
 		This is useful for subscribing to multiple events from a single script.
 	*/
-	public class SandboxEventDelegateListener : SandboxEventListener
+	public sealed class DelegateListener : Listener
 	{
-		private bool listening = false;
+		public bool Enabled
+			{ get; private set; }
 
 		public SandboxEvent Event
 			{ get; private set; }
@@ -25,9 +26,9 @@ namespace CREATIVE.SandboxAssets
 			The method to call when the SandboxEvent is invoked must have a
 			signature matching this delegate.
 		*/
-		public delegate bool SandboxEventHandler(UnityEngine.Object target);
+		public delegate bool EventHandler(UnityEngine.Object target);
 
-		private SandboxEventHandler handler;
+		private EventHandler handler;
 
 		/**
 			If this list is null, the listener will work normally
@@ -49,11 +50,11 @@ namespace CREATIVE.SandboxAssets
 			
 			These parameters cannot be changed after the object is constructed.
 		*/
-		public SandboxEventDelegateListener
+		public DelegateListener
 		(
 			SandboxEvent sandboxEvent,
 			UnityEngine.Object listeningObject,
-			SandboxEventHandler handler,
+			EventHandler handler,
 			IEnumerable<UnityEngine.Object> targetFilter = null
 		)
 		{
@@ -90,31 +91,32 @@ namespace CREATIVE.SandboxAssets
 			TargetFilter = tempFilter;
 		}
 
-		~SandboxEventDelegateListener()
-		{
-			Disable();
-		}
+		~DelegateListener() => Disable();
 
 		public void Enable()
 		{
-			if (listening==false)
+			if (!Enabled)
 			{
 				Event.AddListener(this);
-				listening = true;
+				Enabled = true;
 			}
 		}
 
 		public void Disable()
 		{
-			if (listening)
+			if (Enabled)
 			{
 				Event.DropListener(this);
-				listening = false;
+				Enabled = false;
 			}
 		}
 		
 		public bool Invoke(UnityEngine.Object target)
 		{
+			if (!Enabled)
+				throw new InvalidOperationException
+					("Something attepted to invoke a Sandbox Event Delegate Listener that had been disabled.");
+			
 			bool passesTargetFilter = TargetFilter==null;
 
 			if (TargetFilter!=null)
@@ -122,9 +124,9 @@ namespace CREATIVE.SandboxAssets
 					if (targetMatch == target)
 						passesTargetFilter = true;
 			
-			if (listening && passesTargetFilter && handler(target))
+			if (Enabled && passesTargetFilter && handler(target))
 			{
-				listening = false;
+				Enabled = false;
 				return true;
 			}
 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		Interface that all Sandbox Event Listeners must implement.
@@ -18,7 +18,7 @@ namespace CREATIVE.SandboxAssets
 			  when the Event is invoked, unless the target is contained inside
 			  it. Can be null to allow all targets.
 	*/
-	public interface SandboxEventListener
+	public interface Listener
 	{
 		public abstract SandboxEvent Event
 			{ get; }

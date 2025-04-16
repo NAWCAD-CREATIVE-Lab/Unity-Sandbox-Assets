@@ -9,13 +9,13 @@ using UnityEngine.UI;
 using UnityEditor;
 #endif
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		This class inherits from the Button class in order to invoke a
 		SandboxEvent (or multiple) whenever the button is pressed.
 	*/
-	public class SandboxEventButtonInvoker : Button
+	public class ButtonInvoker : Button
 	{
 		/**
 			Indicates whether the button should invoke a single SandboxEvent or
@@ -45,23 +45,23 @@ namespace CREATIVE.SandboxAssets
 			Shows the default Button script editor, but adds the SandboxEvent
 			field (or list of fields if 'Multiple Events' is checked).
 		*/
-		[CustomEditor(typeof(SandboxEventButtonInvoker))]
+		[CustomEditor(typeof(ButtonInvoker))]
 		private class Editor : UnityEditor.UI.ButtonEditor
 		{
 			public override void OnInspectorGUI()
 			{
 				base.OnInspectorGUI();
 
-				SandboxEventButtonInvoker sandboxEventButtonInvoker = target as SandboxEventButtonInvoker;
+				ButtonInvoker sandboxEventButtonInvoker = target as ButtonInvoker;
 
 				serializedObject.Update();
 
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventButtonInvoker.MultipleEvents)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ButtonInvoker.MultipleEvents)));
 
 				if (sandboxEventButtonInvoker.MultipleEvents)
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventButtonInvoker.Events)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ButtonInvoker.Events)));
 				else
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEventButtonInvoker.Event)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ButtonInvoker.Event)));
 
 				serializedObject.ApplyModifiedProperties();
 			}

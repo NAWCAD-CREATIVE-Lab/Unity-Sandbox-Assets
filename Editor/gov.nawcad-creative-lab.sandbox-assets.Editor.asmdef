@@ -1,0 +1,16 @@
+{
+    "name": "gov.nawcad-creative-lab.sandbox-assets.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:da63f1da040d99d40a22ead778a9d890"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

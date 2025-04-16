@@ -2050,7 +2050,7 @@ MonoBehaviour:
   - EventsToListenFor:
     - Event: {fileID: 11400000, guid: 76c3f6d3529fbd34ba6ccca2bc25b003, type: 2}
       TargetFilter: []
-    WaitForAnyNotAll: 0
+    CompleteOnFirstEvent: 0
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 103505115}
@@ -2059,7 +2059,7 @@ MonoBehaviour:
       TargetFilter: []
     - Event: {fileID: 11400000, guid: 73f0b9dd5ab97e64c89fbe89db73b47e, type: 2}
       TargetFilter: []
-    WaitForAnyNotAll: 0
+    CompleteOnFirstEvent: 0
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 1022592209}
@@ -2068,7 +2068,7 @@ MonoBehaviour:
       TargetFilter: []
     - Event: {fileID: 11400000, guid: 73f0b9dd5ab97e64c89fbe89db73b47e, type: 2}
       TargetFilter: []
-    WaitForAnyNotAll: 1
+    CompleteOnFirstEvent: 1
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 2140485901}
@@ -2076,7 +2076,7 @@ MonoBehaviour:
     - Event: {fileID: 11400000, guid: 5e67eb86178b8c6448fb27c7e7edd5f6, type: 2}
       TargetFilter:
       - {fileID: 206513049}
-    WaitForAnyNotAll: 0
+    CompleteOnFirstEvent: 0
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 2147031293}
@@ -2090,7 +2090,7 @@ MonoBehaviour:
     - Event: {fileID: 11400000, guid: 5e67eb86178b8c6448fb27c7e7edd5f6, type: 2}
       TargetFilter:
       - {fileID: 896840885}
-    WaitForAnyNotAll: 0
+    CompleteOnFirstEvent: 0
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 499102244}
@@ -2100,11 +2100,11 @@ MonoBehaviour:
       - {fileID: 206513049}
       - {fileID: 1579077469}
       - {fileID: 896840885}
-    WaitForAnyNotAll: 0
+    CompleteOnFirstEvent: 0
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 273915304}
-  currentStepIndex: 0
+  CurrentStepIndex: -1
 --- !u!1 &1579077469
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 {
   "name": "gov.nawcad-creative-lab.sandbox-assets",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "displayName": "Sandbox Assets",
   "description": "Scriptable objects allowing for the creation of variables, references and events inside the Unity Asset folder.\n\nThe samples in this package are in order of dependency.",
   "unity": "6000.0",
@@ -54,6 +54,11 @@
       "displayName": "Event Sequence Test",
       "description": "Contains a test scene for the Event Sequence script.",
       "path": "Samples~/03 Event Sequence Test"
+    },
+    {
+      "displayName": "Behavior Tree Test",
+      "description": "Contains a test scene for Behavior Trees.",
+      "path": "Samples~/03 Behavior Tree Test"
     }
   ]
 }

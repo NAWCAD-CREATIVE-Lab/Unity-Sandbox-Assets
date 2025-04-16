@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		This class calls various SandboxEvents when the GameObject's collider
 		interacts with other colliders in various ways.
 	*/
 	[RequireComponent(typeof(Collider))]
-	public class SandboxEventColliderInvoker : MonoBehaviour
+	public class ColliderInvoker : MonoBehaviour
 	{
 		/**
 			The SandboxEvent that is invoked when this GameObject's collider

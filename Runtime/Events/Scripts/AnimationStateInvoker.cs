@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		Allows an event to be invoked when an animation state is being entered
@@ -12,7 +12,7 @@ namespace CREATIVE.SandboxAssets
 		Requires the Animation Controller asset to be registered as an invoker
 		in the inspector.
 	*/
-	public class SandboxEventAnimationStateInvoker : StateMachineBehaviour
+	public class AnimationStateInvoker : StateMachineBehaviour
 	{
 		[field: SerializeField]
 		private SandboxEvent EventOnStateEnter;

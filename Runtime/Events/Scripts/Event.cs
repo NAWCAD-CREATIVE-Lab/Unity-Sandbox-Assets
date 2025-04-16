@@ -8,7 +8,7 @@ using System.Linq;
 using UnityEditor;
 #endif
 
-namespace CREATIVE.SandboxAssets
+namespace CREATIVE.SandboxAssets.Events
 {
 	/**
 		An subscribable event-like interface for Unity Objects.
@@ -35,19 +35,19 @@ namespace CREATIVE.SandboxAssets
 		private List<UnityEngine.Object> InvokersFromAssetFolder = new List<UnityEngine.Object>();
 
 		[field: SerializeField]
-		private List<SandboxEventAssetListener> ListenersFromAssetFolder = new List<SandboxEventAssetListener>();
+		private List<AssetListener> ListenersFromAssetFolder = new List<AssetListener>();
 
 		public  IEnumerable<GameObject>	InvokersFromScene { get { return new List<GameObject>(invokersFromScene); } }
 		private List<GameObject>		invokersFromScene = new List<GameObject>();
 
-		private List<SandboxEventListener>			listenersFromScene = new List<SandboxEventListener>();
-		public  IEnumerable<SandboxEventListener>	ListenersFromScene 
-			{ get { return new List<SandboxEventListener>(listenersFromScene); } }
+		private List<Listener>			listenersFromScene = new List<Listener>();
+		public  IEnumerable<Listener>	ListenersFromScene 
+			{ get { return new List<Listener>(listenersFromScene); } }
 		
 		private bool invokeLock = false;
 
-		private List<SandboxEventListener> listenersFromSceneToAdd = new List<SandboxEventListener>();
-		private List<SandboxEventListener> listenersFromSceneToRemove = new List<SandboxEventListener>();
+		private List<Listener> listenersFromSceneToAdd = new List<Listener>();
+		private List<Listener> listenersFromSceneToRemove = new List<Listener>();
 		
 #if UNITY_EDITOR
 		/**
@@ -113,7 +113,7 @@ namespace CREATIVE.SandboxAssets
 						if (sandboxEvent.ListenersFromScene == null || sandboxEvent.ListenersFromScene.Count()==0)
 							EditorGUILayout.LabelField("\tEmpty");
 						
-						else foreach (SandboxEventListener listener in sandboxEvent.ListenersFromScene)
+						else foreach (Listener listener in sandboxEvent.ListenersFromScene)
 							EditorGUILayout.ObjectField(listener.ListeningObject, typeof(UnityEngine.Object), false);
 
 						EditorGUI.EndDisabledGroup();
@@ -130,7 +130,7 @@ namespace CREATIVE.SandboxAssets
 		
 		/**
 			Checks to make sure that the invoking object is authorized to invoke
-			this event, and calls the Invoke method of all SandboxEventListener
+			this event, and calls the Invoke method of all Listener
 			objects with the supplied target object.
 
 			Only works when the application is playing.
@@ -171,7 +171,7 @@ namespace CREATIVE.SandboxAssets
 
 				invokeLock = true;
 
-				foreach (SandboxEventListener listenerFromScene in listenersFromScene)
+				foreach (Listener listenerFromScene in listenersFromScene)
 				{
 					if (target==null)
 					{
@@ -183,8 +183,8 @@ namespace CREATIVE.SandboxAssets
 						listenersFromSceneToRemove.Add(listenerFromScene);
 				}
 				
-				List<SandboxEventAssetListener> listenersFromAssetFolderToRemove = new List<SandboxEventAssetListener>();
-				foreach (SandboxEventAssetListener listenerFromAssetFolder in ListenersFromAssetFolder)
+				List<AssetListener> listenersFromAssetFolderToRemove = new List<AssetListener>();
+				foreach (AssetListener listenerFromAssetFolder in ListenersFromAssetFolder)
 				{
 					if (listenerFromAssetFolder.Event != this)
 						Debug.LogError
@@ -204,13 +204,13 @@ namespace CREATIVE.SandboxAssets
 						listenersFromAssetFolderToRemove.Add(listenerFromAssetFolder);
 				}
 
-				foreach (SandboxEventListener listenerFromSceneToRemove in listenersFromSceneToRemove)
+				foreach (Listener listenerFromSceneToRemove in listenersFromSceneToRemove)
 					listenersFromScene.Remove(listenerFromSceneToRemove);
 				
-				foreach (SandboxEventListener listenerFromSceneToAdd in listenersFromSceneToAdd)
+				foreach (Listener listenerFromSceneToAdd in listenersFromSceneToAdd)
 					listenersFromScene.Add(listenerFromSceneToAdd);
 				
-				foreach (SandboxEventAssetListener listenerFromAssetFolderToRemove in listenersFromAssetFolderToRemove)
+				foreach (AssetListener listenerFromAssetFolderToRemove in listenersFromAssetFolderToRemove)
 					ListenersFromAssetFolder.Remove(listenerFromAssetFolderToRemove);
 				
 				invokeLock = false;
@@ -288,7 +288,7 @@ namespace CREATIVE.SandboxAssets
 
 			Will not function if the Application is not playing.
 		*/
-		public void AddListener(SandboxEventListener listener)
+		public void AddListener(Listener listener)
 		{
 			if (Application.isPlaying)
 			{
@@ -314,12 +314,12 @@ namespace CREATIVE.SandboxAssets
 						"listener"
 					);
 				
-				if (listener is SandboxEventAssetListener)
+				if (listener is AssetListener)
 					throw new ArgumentException
 					(
 						"Object \"" + listener.ListeningObject.name + "\" " +
 						"attempted to add a listener to the \"" + name + "\" Sandbox Event through AddListener " +
-						"but the listener is a SandboxEventAssetListener. " +
+						"but the listener is a AssetListener. " +
 						"This listener must be added through ListenersFromAssetFolder.",
 						"listener"
 					);
@@ -359,7 +359,7 @@ namespace CREATIVE.SandboxAssets
 		/**
 			Removes the supplied object as a listener of this event.
 		*/
-		public void DropListener(SandboxEventListener listener)
+		public void DropListener(Listener listener)
 		{
 			if (listener == null)
 				throw new ArgumentNullException("listener");
@@ -397,7 +397,7 @@ namespace CREATIVE.SandboxAssets
 			if (invokeLock)
 				listenersFromSceneToRemove.Add(listener);
 			else
-				listenersFromSceneToRemove.Add(listener);
+				listenersFromScene.Remove(listener);
 		}
 	}
 }
