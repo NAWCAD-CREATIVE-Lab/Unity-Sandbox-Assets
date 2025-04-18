@@ -1,6 +1,6 @@
 {
   "name": "gov.nawcad-creative-lab.sandbox-assets",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "displayName": "Sandbox Assets",
   "description": "Scriptable objects allowing for the creation of variables, references and events inside the Unity Asset folder.\n\nThe samples in this package are in order of dependency.",
   "unity": "6000.0",

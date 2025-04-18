@@ -6,13 +6,13 @@ using CREATIVE.SandboxAssets.Events;
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
     [type: Serializable]
-	public sealed class EventToListenFor
+	public class EventToListenFor
 	{
-		public SandboxEvent Event;
+		public SandboxEvent Event = null;
 
-		public List<UnityEngine.Object> TargetFilter;
+		public List<UnityEngine.Object> TargetFilter = new List<UnityEngine.Object>();
 
-		private List<UnityEngine.Object> CleanTargetFilter
+		List<UnityEngine.Object> CleanTargetFilter
 		{
 			get
 			{

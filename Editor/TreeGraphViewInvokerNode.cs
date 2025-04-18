@@ -10,11 +10,11 @@ using CREATIVE.SandboxAssets.Events;
 
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
-	sealed public class TreeGraphViewInvokerNode : TreeGraphViewNode
+	public class TreeGraphViewInvokerNode : TreeGraphViewNode
 	{
 		public readonly Port NextNodePort;
 
-		private readonly List<VisualElement> eventContainers;
+		List<VisualElement> eventContainers = new List<VisualElement>();
 
 		public TreeGraphViewInvokerNode(TreeGraphView treeGraphView, SerializedProperty invokerProperty)
 			: base(treeGraphView, invokerProperty, "Invoker")
@@ -43,7 +43,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			RefreshExpandedState();
 		}
 
-		private void RefreshEvents()
+		void RefreshEvents()
 		{
 			foreach (VisualElement eventContainer in eventContainers)
 				eventContainer.RemoveFromHierarchy();
@@ -57,7 +57,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				AddEvent(eventsToInvokeProperty.GetArrayElementAtIndex(i));
 		}
 
-		private void AddEvent(SerializedProperty eventToInvokeProperty = null)
+		void AddEvent(SerializedProperty eventToInvokeProperty = null)
 		{
 			if (eventToInvokeProperty == null)
 			{

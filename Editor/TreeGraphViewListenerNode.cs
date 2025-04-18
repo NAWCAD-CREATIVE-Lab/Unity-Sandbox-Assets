@@ -10,11 +10,11 @@ using CREATIVE.SandboxAssets.Events;
 
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
-	sealed public class TreeGraphViewListenerNode : TreeGraphViewNode
+	public class TreeGraphViewListenerNode : TreeGraphViewNode
 	{
 		public readonly Port NextNodePort;
 
-		private readonly List<(SerializedProperty, VisualElement, Port)> bindings;
+		List<(SerializedProperty, VisualElement, Port)> bindings = new List<(SerializedProperty, VisualElement, Port)>();
 
 		public TreeGraphViewListenerNode(TreeGraphView treeGraphView, SerializedProperty listenerProperty)
 			: base(treeGraphView, listenerProperty, "Listener")
@@ -30,8 +30,6 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Node));
 			NextNodePort.portName = null;
 			outputContainer.Add(NextNodePort);
-			
-			bindings = new List<(SerializedProperty, VisualElement, Port)>();
 
 			Toggle completeAfterFirstEventToggle = new Toggle();
 			completeAfterFirstEventToggle.text = "Complete On First Event";
@@ -39,7 +37,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				(listenerProperty.FindPropertyRelative(nameof(ListenerNode.CompleteOnFirstEvent)));
 			
 			Toggle branchOnCompletionToggle = new Toggle();
-			branchOnCompletionToggle.text = "Branch on Completion";
+			branchOnCompletionToggle.text = "Branch On Completion";
 			branchOnCompletionToggle.BindProperty
 				(listenerProperty.FindPropertyRelative(nameof(ListenerNode.BranchOnCompletion)));
 			branchOnCompletionToggle.RegisterValueChangedCallback
@@ -54,9 +52,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				}
 			);
 
-			Button addBranchButton = new Button();
-			addBranchButton.text = "Add Branch";
-			addBranchButton.clicked += () => AddEvent();
+			Button addEventButton = new Button();
+			addEventButton.text = "Add Event";
+			addEventButton.clicked += () => AddEvent();
 
 			mainContainer.Add(branchOnCompletionToggle);
 			mainContainer.Add(completeAfterFirstEventToggle);
@@ -64,14 +62,14 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			branchOnCompletionToggle.PlaceInFront(titleContainer);
 			completeAfterFirstEventToggle.PlaceInFront(branchOnCompletionToggle);
 
-			extensionContainer.Add(addBranchButton);
+			extensionContainer.Add(addEventButton);
 			
 			RefreshEvents();
 			
 			RefreshExpandedState();
 		}
 
-		private void RefreshEvents()
+		void RefreshEvents()
 		{
 			foreach ((SerializedProperty, VisualElement, Port) binding in bindings)
 				binding.Item2.RemoveFromHierarchy();
@@ -89,7 +87,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			RefreshExpandedState();
 		}
 
-		private void AddEvent(SerializedProperty eventToListenForProperty = null)
+		void AddEvent(SerializedProperty eventToListenForProperty = null)
 		{
 			if (eventToListenForProperty == null)
 			{

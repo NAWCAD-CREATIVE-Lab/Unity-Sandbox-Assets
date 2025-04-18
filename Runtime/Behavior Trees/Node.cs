@@ -10,7 +10,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 	{
 #if UNITY_EDITOR
 		[field: HideInInspector]
-		public Vector2 Position;
+		public Vector2 Position = Vector2.zero;
 #endif
 
 		public static List<Node> CleanCloneList(List<Node> nodes)

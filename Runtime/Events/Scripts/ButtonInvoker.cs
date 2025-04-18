@@ -21,22 +21,22 @@ namespace CREATIVE.SandboxAssets.Events
 			Indicates whether the button should invoke a single SandboxEvent or
 			Multiple, when pressed.
 		*/
-		[field: SerializeField]
-		private bool MultipleEvents = false;
+		[field: SerializeField] bool MultipleEvents				= false;
+								bool registeredMultipleEvents	= false;
 		
 		/**
 			The SandboxEvent to invoke when the button is pressed, if
 			MultipleEvents is false.
 		*/
-		[field: SerializeField]
-		private SandboxEvent Event;
+		[field: SerializeField] SandboxEvent Event = null;
 
 		/**
 			A list of SandboxEvents to invoke when the button is pressed, if
 			MultipleEvents is true.
 		*/
-		[field: SerializeField]
-		private List<SandboxEvent> Events;
+		[field: SerializeField]	List<SandboxEvent> Events = new List<SandboxEvent>();
+		
+		List<SandboxEvent> registeredEvents = new List<SandboxEvent>();
 
 #if UNITY_EDITOR
 		/**
@@ -45,20 +45,18 @@ namespace CREATIVE.SandboxAssets.Events
 			Shows the default Button script editor, but adds the SandboxEvent
 			field (or list of fields if 'Multiple Events' is checked).
 		*/
-		[CustomEditor(typeof(ButtonInvoker))]
-		private class Editor : UnityEditor.UI.ButtonEditor
+		[type: CustomEditor(typeof(ButtonInvoker))]
+		class Editor : UnityEditor.UI.ButtonEditor
 		{
-			public override void OnInspectorGUI()
+			override public void OnInspectorGUI()
 			{
 				base.OnInspectorGUI();
-
-				ButtonInvoker sandboxEventButtonInvoker = target as ButtonInvoker;
 
 				serializedObject.Update();
 
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ButtonInvoker.MultipleEvents)));
 
-				if (sandboxEventButtonInvoker.MultipleEvents)
+				if (serializedObject.FindProperty(nameof(ButtonInvoker.MultipleEvents)).boolValue)
 					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ButtonInvoker.Events)));
 				else
 					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ButtonInvoker.Event)));
@@ -68,24 +66,29 @@ namespace CREATIVE.SandboxAssets.Events
 		}
 #endif
 
-		private List<SandboxEvent> registeredEvents = null;
+		bool registered;
 
-		protected override void OnEnable()		{ base.OnEnable();		ReRegister();	}
-		protected override void Start()			{ base.OnEnable();		ReRegister();	}
-		protected override void OnValidate()	{ base.OnValidate();	ReRegister();	}
-		
-		protected override void OnDisable()		{ base.OnDisable();		UnRegister();	}
-		protected override void OnDestroy()		{ base.OnDestroy();		UnRegister();	}
+		override protected void OnEnable()		{ base.OnEnable();		ReRegister();	}
+		override protected void Start()			{ base.OnEnable();		ReRegister();	}
 
-		private void ReRegister()
+#if UNITY_EDITOR
+		override protected void OnValidate()	{ base.OnValidate();	ReRegister();	}
+#endif
+
+		override protected void OnDisable()		{ base.OnDisable();		UnRegister();	}
+		override protected void OnDestroy()		{ base.OnDestroy();		UnRegister();	}
+
+		void ReRegister()
 		{
 			UnRegister();
 
 			if (Application.isPlaying && isActiveAndEnabled)
 			{
+				registeredMultipleEvents = MultipleEvents;
+				
 				registeredEvents = new List<SandboxEvent>();
 				
-				if (MultipleEvents)
+				if (registeredMultipleEvents)
 				{
 					foreach (SandboxEvent sandboxEvent in Events)
 						if (sandboxEvent != null)
@@ -95,31 +98,28 @@ namespace CREATIVE.SandboxAssets.Events
 				else if (Event != null)
 					registeredEvents.Add(Event);
 				
-				if (registeredEvents.Count > 0)
-					foreach (SandboxEvent sandboxEvent in registeredEvents)
-						sandboxEvent.AddInvoker(gameObject);
-				
-				else
-					registeredEvents = null;
-			}
-		}
-
-		private void UnRegister()
-		{
-			if (registeredEvents != null)
-			{
 				foreach (SandboxEvent sandboxEvent in registeredEvents)
-					sandboxEvent.DropInvoker(gameObject);
+					sandboxEvent.AddInvoker(gameObject);
 				
-				registeredEvents = null;
+				registered = true;
 			}
 		}
 
-		public override void OnPointerClick(PointerEventData eventData)
+		void UnRegister()
+		{
+			foreach (SandboxEvent sandboxEvent in registeredEvents)
+				sandboxEvent.DropInvoker(gameObject);
+			
+			registeredEvents.Clear();
+
+			registered = false;
+		}
+
+		override public void OnPointerClick(PointerEventData eventData)
 		{
 			base.OnPointerClick(eventData);
 
-			if (eventData.button==PointerEventData.InputButton.Left && registeredEvents!=null)
+			if (eventData.button==PointerEventData.InputButton.Left && registered)
 				foreach (SandboxEvent sandboxEvent in registeredEvents)
 					sandboxEvent.Invoke(gameObject);
 		}

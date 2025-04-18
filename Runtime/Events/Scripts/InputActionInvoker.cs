@@ -22,9 +22,8 @@ namespace CREATIVE.SandboxAssets.Events
 		/**
 			A reference to the InputAction that should be listened for.
 		*/
-		[field: SerializeField]
-		private InputActionReference Action;
-		private InputActionReference registeredAction;
+		[field: SerializeField]	InputActionReference Action				= null;
+								InputActionReference registeredAction	= null;
 
 		/**
 			Which stage of the InputAction should be listened for.
@@ -35,27 +34,28 @@ namespace CREATIVE.SandboxAssets.Events
 			Started and Cancelled can be used to detect when a button starts and
 			stops being held down.
 		*/
-		[field: SerializeField]
-		private InputActionStage ActionStage = InputActionStage.Performed;
-		private InputActionStage registeredActionStage;
+		[field: SerializeField] InputActionStage ActionStage			= InputActionStage.Performed;
+								InputActionStage registeredActionStage	= InputActionStage.Performed;
 
 		/**
 			The SandboxEvent that is invoked by the InputAction
 		*/
-		[field: SerializeField]
-		private SandboxEvent Event = null;
-		private SandboxEvent registeredEvent;
+		[field: SerializeField] SandboxEvent Event				= null;
+								SandboxEvent registeredEvent	= null;
 
-		private bool registered = false;
+		bool registered = false;
+		
+		void OnEnable() => ReRegister();
+		void Start()	=> ReRegister();
 
-		void Start()		=> ReRegister();
-		void OnValidate()	=> ReRegister();
-		void OnEnable()		=> ReRegister();
-
+#if UNITY_EDITOR
+		void OnValidate() => ReRegister();
+#endif
+		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
 
-		private void ReRegister()
+		void ReRegister()
 		{
 			UnRegister();
 
@@ -80,7 +80,7 @@ namespace CREATIVE.SandboxAssets.Events
 			}
 		}
 
-		private void UnRegister()
+		void UnRegister()
 		{
 			if (registered)
 			{
@@ -92,13 +92,17 @@ namespace CREATIVE.SandboxAssets.Events
 				
 				if (registeredActionStage == InputActionStage.Cancelled)
 					registeredAction.action.canceled -= Invoke;
-				
-				registeredEvent.DropInvoker(gameObject);
-
-				registered = false;
 			}
+
+			if (registeredEvent != null)
+			{	
+				registeredEvent.DropInvoker(gameObject);
+				registeredEvent = null;
+			}
+
+			registered = false;
 		}
 
-		private void Invoke(InputAction.CallbackContext context) => registeredEvent.Invoke(gameObject);
+		void Invoke(InputAction.CallbackContext context) => registeredEvent.Invoke(gameObject);
 	}
 }

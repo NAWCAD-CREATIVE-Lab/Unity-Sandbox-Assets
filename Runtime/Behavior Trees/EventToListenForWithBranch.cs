@@ -7,14 +7,14 @@ using CREATIVE.SandboxAssets.Events;
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
     [type: Serializable]
-	public sealed class EventToListenForWithBranch
+	public class EventToListenForWithBranch
 	{
-		public SandboxEvent Event;
+		public SandboxEvent Event = null;
 
-		public List<UnityEngine.Object> TargetFilter;
+		public List<UnityEngine.Object> TargetFilter = new List<UnityEngine.Object>();
 
 		[field: SerializeReference]
-		public Node NextNode;
+		public Node NextNode = null;
 
 		public EventToListenForWithBranch CleanCloneWithoutNextNode
 		{
@@ -68,59 +68,6 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			
 			if (NextNode != null)
 				hash = hash ^ NextNode.GetHashCode();
-			
-			return hash;
-		}
-	}
-
-	[type: Serializable]
-	public sealed class EventToInvoke
-	{
-		public SandboxEvent Event;
-
-		public UnityEngine.Object Target;
-
-		public EventToInvoke CleanClone
-		{
-			get
-			{
-				if (this.Event == null)
-					return null;
-				
-				return new EventToInvoke()
-				{
-					Event = this.Event,
-					Target = this.Target
-				};
-			}
-		}
-
-		override public bool Equals(object eventToInvokeObject)
-		{
-			if (eventToInvokeObject == null)
-				return false;
-			
-			if (!(eventToInvokeObject is EventToInvoke))
-				throw new ArgumentException
-					(
-						nameof(eventToInvokeObject),
-						nameof(eventToInvokeObject) + " is not of type EventToInvoke"
-					);
-			
-			EventToInvoke eventToInvoke = eventToInvokeObject as EventToInvoke;
-			
-			return Event==eventToInvoke.Event && Target==eventToInvoke.Target;
-		}
-
-		override public int GetHashCode()
-		{
-			int hash = 0;
-
-			if (Event!=null)
-				hash = Event.GetHashCode();
-			
-			if (Target!=null)
-				hash = hash ^ Target.GetHashCode();
 			
 			return hash;
 		}

@@ -25,38 +25,35 @@ namespace CREATIVE.SandboxAssets.Events
 
 		Each event can be invoked optionally with another object as an argument.
 	*/
+#if UNITY_EDITOR
 	[CreateAssetMenu(fileName = "Event", menuName = "NAWCAD CREATIVE Lab/Sandbox Assets/Event")]
+#endif
 	public class SandboxEvent : ScriptableObject
 	{
-		[field: SerializeField]
-		private UnityEngine.Object ExclusiveInvokerFromAssetFolder;
+		[field: SerializeField] UnityEngine.Object			ExclusiveInvokerFromAssetFolder	= null;
+		[field: SerializeField] List<UnityEngine.Object>	InvokersFromAssetFolder			= new List<UnityEngine.Object>();
+		[field: SerializeField] List<AssetListener>			ListenersFromAssetFolder		= new List<AssetListener>();
 
-		[field: SerializeField]
-		private List<UnityEngine.Object> InvokersFromAssetFolder = new List<UnityEngine.Object>();
-
-		[field: SerializeField]
-		private List<AssetListener> ListenersFromAssetFolder = new List<AssetListener>();
-
-		public  IEnumerable<GameObject>	InvokersFromScene { get { return new List<GameObject>(invokersFromScene); } }
-		private List<GameObject>		invokersFromScene = new List<GameObject>();
-
-		private List<Listener>			listenersFromScene = new List<Listener>();
-		public  IEnumerable<Listener>	ListenersFromScene 
-			{ get { return new List<Listener>(listenersFromScene); } }
+		List<GameObject>	invokersFromScene	= new List<GameObject>();
+		List<Listener>		listenersFromScene	= new List<Listener>();
 		
-		private bool invokeLock = false;
-
-		private List<Listener> listenersFromSceneToAdd = new List<Listener>();
-		private List<Listener> listenersFromSceneToRemove = new List<Listener>();
+		bool			invokeLock					= false;
+		List<Listener>	listenersFromSceneToAdd		= new List<Listener>();
+		List<Listener>	listenersFromSceneToRemove	= new List<Listener>();
 		
 #if UNITY_EDITOR
+		event Action repaintEditor;
+		
 		/**
 			Custom editor for the SandboxEvent.
 		*/
-		[CustomEditor(typeof(SandboxEvent))]
-		public class Editor : UnityEditor.Editor
+		[type: CustomEditor(typeof(SandboxEvent))]
+		class Editor : UnityEditor.Editor
 		{
-			public override void OnInspectorGUI()
+			void OnEnable()		=> (target as SandboxEvent).repaintEditor += Repaint;
+			void OnDisable()	=> (target as SandboxEvent).repaintEditor -= Repaint;
+			
+			override public void OnInspectorGUI()
 			{
 				SandboxEvent sandboxEvent = target as SandboxEvent;
 
@@ -70,12 +67,15 @@ namespace CREATIVE.SandboxAssets.Events
 				
 				EditorGUILayout.LabelField("Invokers", headerStyle);
 
+					SerializedProperty exclusiveInvokerFromAssetFolderProperty =
+						serializedObject.FindProperty(nameof(SandboxEvent.ExclusiveInvokerFromAssetFolder));
+					
 					EditorGUILayout.BeginHorizontal();
 					EditorGUILayout.LabelField("Exclusive Invoker");
-					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SandboxEvent.ExclusiveInvokerFromAssetFolder)), GUIContent.none);
+					EditorGUILayout.PropertyField(exclusiveInvokerFromAssetFolderProperty, GUIContent.none);
 					EditorGUILayout.EndHorizontal();
 					
-					if (sandboxEvent.ExclusiveInvokerFromAssetFolder==null)
+					if (exclusiveInvokerFromAssetFolderProperty.objectReferenceValue==null)
 					{
 						EditorGUILayout.PropertyField
 						(
@@ -87,10 +87,10 @@ namespace CREATIVE.SandboxAssets.Events
 
 							EditorGUI.BeginDisabledGroup(true);
 
-								if (sandboxEvent.InvokersFromScene == null || sandboxEvent.InvokersFromScene.Count()==0)
+								if (sandboxEvent.invokersFromScene == null || sandboxEvent.invokersFromScene.Count()==0)
 									EditorGUILayout.LabelField("\tEmpty");
 								
-								else foreach (GameObject invoker in sandboxEvent.InvokersFromScene)
+								else foreach (GameObject invoker in sandboxEvent.invokersFromScene)
 									EditorGUILayout.ObjectField(invoker, typeof(GameObject), false);
 							
 							EditorGUI.EndDisabledGroup();
@@ -110,20 +110,15 @@ namespace CREATIVE.SandboxAssets.Events
 
 						EditorGUI.BeginDisabledGroup(true);
 
-						if (sandboxEvent.ListenersFromScene == null || sandboxEvent.ListenersFromScene.Count()==0)
-							EditorGUILayout.LabelField("\tEmpty");
-						
-						else foreach (Listener listener in sandboxEvent.ListenersFromScene)
-							EditorGUILayout.ObjectField(listener.ListeningObject, typeof(UnityEngine.Object), false);
+							if (sandboxEvent.listenersFromScene == null || sandboxEvent.listenersFromScene.Count()==0)
+								EditorGUILayout.LabelField("\tEmpty");
+							
+							else foreach (Listener listener in sandboxEvent.listenersFromScene)
+								EditorGUILayout.ObjectField(listener.ListeningObject, typeof(UnityEngine.Object), false);
 
 						EditorGUI.EndDisabledGroup();
 					
 				serializedObject.ApplyModifiedProperties();
-			}
-
-			public override bool RequiresConstantRepaint()
-			{
-				return true;
 			}
 		}
 #endif
@@ -214,6 +209,11 @@ namespace CREATIVE.SandboxAssets.Events
 					ListenersFromAssetFolder.Remove(listenerFromAssetFolderToRemove);
 				
 				invokeLock = false;
+
+#if UNITY_EDITOR
+				if (repaintEditor != null)
+					repaintEditor();
+#endif
 			}
 		}
 
@@ -258,6 +258,11 @@ namespace CREATIVE.SandboxAssets.Events
 					
 					invokersFromScene.Add(invoker as GameObject);
 				}
+
+#if UNITY_EDITOR
+				if (repaintEditor != null)
+					repaintEditor();
+#endif
 			}
 		}
 
@@ -279,6 +284,11 @@ namespace CREATIVE.SandboxAssets.Events
 				);
 			
 			invokersFromScene.Remove(invoker as GameObject);
+
+#if UNITY_EDITOR
+			if (repaintEditor != null)
+				repaintEditor();
+#endif
 		}
 
 		/**
@@ -353,6 +363,11 @@ namespace CREATIVE.SandboxAssets.Events
 							listenersFromScene.Add(listener);
 					}
 				}
+
+#if UNITY_EDITOR
+				if (repaintEditor != null)
+					repaintEditor();
+#endif
 			}
 		}
 
@@ -398,6 +413,11 @@ namespace CREATIVE.SandboxAssets.Events
 				listenersFromSceneToRemove.Add(listener);
 			else
 				listenersFromScene.Remove(listener);
+
+#if UNITY_EDITOR
+			if (repaintEditor != null)
+				repaintEditor();
+#endif
 		}
 	}
 }

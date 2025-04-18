@@ -12,28 +12,31 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	public class BehaviorTreeRunner : MonoBehaviour
 	{
-		public bool Registered { get; private set; } = false;
-		
-		public BehaviorTree BehaviorTree;
-		private BehaviorTree registeredBehaviorTree = null;
+		[field: SerializeField]	BehaviorTree BehaviorTree			= null;
+								BehaviorTree registeredBehaviorTree	= null;
 
-		private Node currentNode = null;
+		Node currentNode = null;
 
-		private List<SandboxEvent> registeredEventsToInvoke = new List<SandboxEvent>();
+		List<SandboxEvent> registeredEventsToInvoke = new List<SandboxEvent>();
 
-		private List<DelegateListener> registeredEventListeners = new List<DelegateListener>();
+		List<DelegateListener> registeredEventListeners = new List<DelegateListener>();
 
-		private Dictionary<ListenerNode, Dictionary<EventToListenFor, bool>> registeredListenerStatusIndex =
+		Dictionary<ListenerNode, Dictionary<EventToListenFor, bool>> registeredListenerStatusIndex =
 			new Dictionary<ListenerNode, Dictionary<EventToListenFor, bool>>();
 
-		void Start()		=> ReRegister();
-		void OnValidate()	=> ReRegister();
-		void OnEnable()		=> ReRegister();
+		bool registered = false;
 
+		void OnEnable() => ReRegister();
+		void Start()	=> ReRegister();
+
+#if UNITY_EDITOR
+		void OnValidate() => ReRegister();
+#endif
+		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
 
-		private void ReRegister()
+		void ReRegister()
 		{
 			UnRegister();
 
@@ -112,7 +115,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 					foreach (DelegateListener delegateListener in registeredEventListeners)
 						delegateListener.Enable();
 					
-					Registered = true;
+					registered = true;
 				}
 
 				catch (Exception e)
@@ -128,7 +131,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			}
 		}
 
-		private void UnRegister()
+		void UnRegister()
 		{
 			if (registeredBehaviorTree != null)
 			{
@@ -146,10 +149,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				delegateListener.Disable();
 			registeredEventListeners.Clear();
 
-			Registered = false;
+			registered = false;
 		}
 
-		private void EvaluateCurrentNode()
+		void EvaluateCurrentNode()
 		{
 			if (currentNode != null)
 			{
@@ -179,7 +182,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			}
 		}
 
-		private bool HandleEvent(Dictionary<ListenerNode, EventToListenFor> listeningNodeInfoIndex)
+		bool HandleEvent(Dictionary<ListenerNode, EventToListenFor> listeningNodeInfoIndex)
 		{
 			if (currentNode!=null && currentNode is ListenerNode)
 			{

@@ -11,7 +11,7 @@ namespace CREATIVE.SandboxAssets.Events
 
 		This is useful for subscribing to multiple events from a single script.
 	*/
-	public sealed class DelegateListener : Listener
+	public class DelegateListener : Listener
 	{
 		public bool Enabled
 			{ get; private set; }
@@ -26,9 +26,8 @@ namespace CREATIVE.SandboxAssets.Events
 			The method to call when the SandboxEvent is invoked must have a
 			signature matching this delegate.
 		*/
-		public delegate bool EventHandler(UnityEngine.Object target);
-
-		private EventHandler handler;
+		public delegate bool	EventHandler(UnityEngine.Object target);
+								EventHandler handler;
 
 		/**
 			If this list is null, the listener will work normally

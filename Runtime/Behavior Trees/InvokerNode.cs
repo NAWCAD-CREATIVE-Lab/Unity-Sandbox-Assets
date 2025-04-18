@@ -6,13 +6,13 @@ using UnityEngine;
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	[type: Serializable]
-	public sealed class InvokerNode : Node
+	public class InvokerNode : Node
 	{
 		[field: SerializeReference]
-		public Node NextNode;
+		public Node NextNode = null;
 		
 		[field: SerializeReference]
-		public List<EventToInvoke> EventsToInvoke;
+		public List<EventToInvoke> EventsToInvoke = new List<EventToInvoke>();
 
 		public InvokerNode CleanCloneWithoutNextNode
 		{

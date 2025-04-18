@@ -6,7 +6,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	public class TreeEditor : EditorWindow
 	{
-		private TreeGraphView treeView;
+		TreeGraphView treeView = null;
 		
 		[MenuItem("Window/CREATIVE Lab/Sandbox Assets/Behavior Tree Editor")]
 		public static void OpenWindow()
@@ -15,7 +15,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			window.titleContent = new GUIContent("Behavior Tree");
 		}
 
-		private void CreateGUI()
+		void CreateGUI()
 		{
 			treeView = new TreeGraphView();
 
@@ -26,7 +26,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			OnSelectionChange();
 		}
 
-		private void OnSelectionChange()
+		void OnSelectionChange()
 		{
 			UnityEngine.Object selectedObject = Selection.activeObject;
 

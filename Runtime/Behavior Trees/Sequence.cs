@@ -26,21 +26,18 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 	*/
 	public class Sequence : MonoBehaviour
 	{
-		[field: SerializeField]
-		private List<Step> Steps;
+		[field: SerializeField] List<Step> Steps = new List<Step>();
 
-		public bool Registered { get; private set; }
+		int currentStep = -1;
 
-		public int CurrentStep { get; private set; }
+		ListenerNode currentNode = null;
 
-		private ListenerNode currentNode = null;
-
-		private Dictionary<ListenerNode, Dictionary<EventToListenFor, bool>> registeredListenerStatusIndex =
+		Dictionary<ListenerNode, Dictionary<EventToListenFor, bool>> registeredListenerStatusIndex =
 			new Dictionary<ListenerNode, Dictionary<EventToListenFor, bool>>();
 
-		private List<SandboxEvent> registeredEventsToInvoke = new List<SandboxEvent>();
+		List<SandboxEvent> registeredEventsToInvoke = new List<SandboxEvent>();
 
-		private List<DelegateListener> registeredEventListeners = new List<DelegateListener>();
+		List<DelegateListener> registeredEventListeners = new List<DelegateListener>();
 
 #if UNITY_EDITOR
 		private event Action repaintEditor;
@@ -48,8 +45,8 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 		[CustomEditor(typeof(Sequence))]
 		public class Editor : UnityEditor.Editor
 		{
-			void OnEnable() { (target as Sequence).repaintEditor += Repaint; }
-			void OnDisable() { (target as Sequence).repaintEditor -= Repaint; }
+			void OnEnable()		=> (target as Sequence).repaintEditor += Repaint;
+			void OnDisable()	=> (target as Sequence).repaintEditor -= Repaint;
 			
 			public override void OnInspectorGUI()
 			{
@@ -57,13 +54,13 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 				Sequence sequence = target as Sequence;
 
-				if (Application.isPlaying && sequence.Registered)
+				if (Application.isPlaying && sequence.registered)
 				{
-					if (sequence.CurrentStep == 0)
+					if (sequence.currentStep == 0)
 						EditorGUILayout.LabelField("Sequence Completed");
 					else
 						EditorGUILayout.LabelField
-							("Current Step: " + sequence.CurrentStep);
+							("Current Step: " + sequence.currentStep);
 					
 					EditorGUILayout.Space(20);
 				}
@@ -75,14 +72,19 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 		}
 #endif
 
-		void Start()		=> ReRegister();
-		void OnValidate()	=> ReRegister();
-		void OnEnable()		=> ReRegister();
+		bool registered = false;
+		
+		void OnEnable() => ReRegister();
+		void Start()	=> ReRegister();
 
+#if UNITY_EDITOR
+		void OnValidate() => ReRegister();
+#endif
+		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
 
-		private void ReRegister()
+		void ReRegister()
 		{
 			UnRegister();
 
@@ -93,7 +95,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 					currentNode = Step.CleanCloneListAsNodes(Steps);
 
 					if (currentNode == null)
-						CurrentStep = 0;
+						currentStep = 0;
 
 					else
 					{
@@ -151,10 +153,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 						foreach (DelegateListener registeredEventListener in registeredEventListeners)
 							registeredEventListener.Enable();
 
-						CurrentStep = 1;
+						currentStep = 1;
 					}
 
-					Registered = true;
+					registered = true;
 				}
 
 				catch (Exception e)
@@ -166,9 +168,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			}
 		}
 
-		private void UnRegister()
+		void UnRegister()
 		{
-			CurrentStep = -1;
+			currentStep = -1;
 
 			currentNode = null;
 
@@ -182,10 +184,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				delegateListener.Disable();
 			registeredEventListeners.Clear();
 
-			Registered = false;
+			registered = false;
 		}
 
-		private bool HandleEvent(Dictionary<ListenerNode, EventToListenFor> listeningNodeInfoIndex)
+		bool HandleEvent(Dictionary<ListenerNode, EventToListenFor> listeningNodeInfoIndex)
 		{
 			if (currentNode!=null && listeningNodeInfoIndex.ContainsKey(currentNode))
 			{
@@ -207,9 +209,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				currentNode = invokerNode.NextNode as ListenerNode;
 				
 				if (currentNode != null)
-					CurrentStep++;
+					currentStep++;
 				
-				else CurrentStep = 0;
+				else currentStep = 0;
 
 #if UNITY_EDITOR
 				if (repaintEditor != null)

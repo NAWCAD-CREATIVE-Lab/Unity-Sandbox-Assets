@@ -10,13 +10,13 @@ using CREATIVE.SandboxAssets.Events;
 
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
-	sealed public class TreeGraphViewEntryNode : UnityEditor.Experimental.GraphView.Node
+	public class TreeGraphViewEntryNode : UnityEditor.Experimental.GraphView.Node
 	{
 		public readonly Port RootNodePort;
 
 		public readonly SerializedProperty RootNodeProperty;
 
-		private SerializedProperty entryNodePositionProperty;
+		SerializedProperty entryNodePositionProperty = null;
 
 		public bool RootNodeIsSet { get { return !RootNodeProperty.ManagedReferenceIsNull(); } }
 

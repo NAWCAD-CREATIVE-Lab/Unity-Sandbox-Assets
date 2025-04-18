@@ -23,14 +23,11 @@ namespace CREATIVE.SandboxAssets.Events
 
 			Disabled by default.
 		*/
-		[field: SerializeField]
-		private bool MultipleEvents = false;
+		[field: SerializeField] bool MultipleEvents = false;
 
-		[field: SerializeField]
-		private SandboxEvent Event;
+		[field: SerializeField] SandboxEvent Event = null;
 		
-		[field: SerializeField]
-		private List<SandboxEvent> Events;
+		[field: SerializeField] List<SandboxEvent> Events = new List<SandboxEvent>();
 		
 		/**
 			If enabled, the target argument of the event being listened to will
@@ -38,17 +35,13 @@ namespace CREATIVE.SandboxAssets.Events
 
 			Disabled by default.
 		*/
-		[field: SerializeField]
-		private bool TargetPassThrough = false;
+		[field: SerializeField] bool TargetPassThrough = false;
 
-		[field: SerializeField]
-		private List<UnityEngine.Object> RestrictToTargets;
+		[field: SerializeField] List<UnityEngine.Object> RestrictToTargets = new List<UnityEngine.Object>();
 
-		[field: SerializeField]
-		private UnityEvent Action;
+		[field: SerializeField] UnityEvent Action = null;
 		
-		[field: SerializeField]
-		private UnityEvent<UnityEngine.Object> ActionWithTarget;
+		[field: SerializeField] UnityEvent<UnityEngine.Object> ActionWithTarget = null;
 
 		/**
 			If enabled, the user will be allowed to set a second event that will
@@ -61,23 +54,22 @@ namespace CREATIVE.SandboxAssets.Events
 
 			Disabled by default.
 		*/
-		[field: SerializeField]
-		private bool LinkEvent = false;
+		[field: SerializeField] bool LinkEvent = false;
 
-		[field: SerializeField]
-		private SandboxEvent LinkedEvent;
+		[field: SerializeField]	SandboxEvent LinkedEvent			= null;
+								SandboxEvent registeredLinkedEvent	= null;
+
+		private List<DelegateListener> registeredListeners = new List<DelegateListener>();
 
 #if UNITY_EDITOR
 		/**
 			A custom editor for the SceneListener.
 		*/
-		[CustomEditor(typeof(SceneListener))]
-		private class Editor : UnityEditor.Editor
+		[type: CustomEditor(typeof(SceneListener))]
+		class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()
 			{
-				SceneListener listener = target as SceneListener;
-				
 				serializedObject.Update();
 				
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.MultipleEvents)));
@@ -86,18 +78,18 @@ namespace CREATIVE.SandboxAssets.Events
 
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.TargetPassThrough)));
 
-				if (listener.MultipleEvents)
+				if (serializedObject.FindProperty(nameof(SceneListener.MultipleEvents)).boolValue)
 					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.Events)));
 				else
 					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.Event)));
 				
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.RestrictToTargets)));
 
-				if (listener.LinkEvent)
+				if (serializedObject.FindProperty(nameof(SceneListener.LinkEvent)).boolValue)
 					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.LinkedEvent)));
 				else
 				{
-					if (listener.TargetPassThrough)
+					if (serializedObject.FindProperty(nameof(SceneListener.TargetPassThrough)).boolValue)
 						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.ActionWithTarget)));
 					else
 						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SceneListener.Action)));
@@ -108,82 +100,68 @@ namespace CREATIVE.SandboxAssets.Events
 		}
 #endif
 
-		private SandboxEvent linkedEvent = null;
+		void OnEnable() => ReRegister();
+		void Start()	=> ReRegister();
 
-		private List<DelegateListener> listeners = new List<DelegateListener>();
-
-		private bool listening = false;
-
-		void Start()		=> ReRegister();
-		void OnValidate()	=> ReRegister();
-		void OnEnable()		=> ReRegister();
-
+#if UNITY_EDITOR
+		void OnValidate() => ReRegister();
+#endif
+		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
 
-		private void ReRegister()
+		void ReRegister()
 		{
 			UnRegister();
 
-			DelegateListener listener = null;
-
 			if (Application.isPlaying && isActiveAndEnabled)
 			{
+				DelegateListener registeredListener = null;
+				
 				if (MultipleEvents)
 				{
-					if (Events!=null && Events.Count!=0)
+					if (Events.Count > 0)
 					{
 						foreach (SandboxEvent sandboxEvent in Events)
 						{
 							if (sandboxEvent!=null)
 							{
-								listener = CreateListener(sandboxEvent);
-								
-								listeners.Add(listener);
+								registeredListener = CreateListener(sandboxEvent);
+								registeredListener.Enable();
 
-								listener.Enable();
-
-								listening = true;
+								registeredListeners.Add(registeredListener);
 							}
 						}
 					}
 				}
 
-				else if (Event!=null)
+				else if (Event != null)
 				{
-					listener = CreateListener(Event);
-					
-					listeners.Add(listener);
+					registeredListener = CreateListener(Event);
+					registeredListener.Enable();
 
-					listener.Enable();
-
-					listening = true;
+					registeredListeners.Add(registeredListener);
 				}
 
-				if (listening && LinkEvent)
+				if (LinkEvent && LinkedEvent != null)
 				{
-					linkedEvent = LinkedEvent;
-					linkedEvent.AddInvoker(gameObject);
+					registeredLinkedEvent = LinkedEvent;
+					registeredLinkedEvent.AddInvoker(gameObject);
 				}
 			}
 		}
 
 		private void UnRegister()
 		{
-			if (listening==true)
+			foreach (DelegateListener registeredListener in registeredListeners)
+				registeredListener.Disable();
+			
+			registeredListeners.Clear();
+
+			if (registeredLinkedEvent!=null)
 			{
-				foreach (DelegateListener listener in listeners)
-					listener.Disable();
-				
-				listeners.Clear();
-
-				if (linkedEvent!=null)
-				{
-					linkedEvent.DropInvoker(gameObject);
-					linkedEvent = null;
-				}
-
-				listening = false;
+				registeredLinkedEvent.DropInvoker(gameObject);
+				registeredLinkedEvent = null;
 			}
 		}
 

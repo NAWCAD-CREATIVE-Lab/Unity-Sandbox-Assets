@@ -15,46 +15,43 @@ namespace CREATIVE.SandboxAssets.Events
 			The SandboxEvent that is invoked when this GameObject's collider
 			starts to intersect with another collider.
 		*/
-		[field: SerializeField]
-		private SandboxEvent CollisionEnterEvent = null;
-		private SandboxEvent registeredCollisionEnterEvent;
+		[field: SerializeField]	SandboxEvent CollisionEnterEvent			= null;
+								SandboxEvent registeredCollisionEnterEvent	= null;
 		
 		/**
 			The SandboxEvent that is invoked when this GameObject's collider
 			stops intersecting with another collider.
 		*/
-		[field: SerializeField]
-		private SandboxEvent CollisionExitEvent = null;
-		private SandboxEvent registeredCollisionExitEvent;
+		[field: SerializeField]	SandboxEvent CollisionExitEvent				= null;
+								SandboxEvent registeredCollisionExitEvent	= null;
 
 		/**
 			The SandboxEvent that is invoked when this GameObject's collider
 			starts to intersect with another collider, and one of the colliders
 			is a trigger.
 		*/
-		[field: SerializeField]
-		private SandboxEvent TriggerEnterEvent = null;
-		private SandboxEvent registeredTriggerEnterEvent;
+		[field: SerializeField]	SandboxEvent TriggerEnterEvent				= null;
+								SandboxEvent registeredTriggerEnterEvent	= null;
 
 		/**
 			The SandboxEvent that is invoked when this GameObject's collider
 			stops intersecting with another collider, and one of the colliders
 			is a trigger.
 		*/
-		[field: SerializeField]
-		private SandboxEvent TriggerExitEvent = null;
-		private SandboxEvent registeredTriggerExitEvent;
+		[field: SerializeField]	SandboxEvent TriggerExitEvent				= null;
+								SandboxEvent registeredTriggerExitEvent		= null;
 
-		private bool registered = false;
+		void OnEnable() => ReRegister();
+		void Start()	=> ReRegister();
 
-		void Start()		=> ReRegister();
-		void OnValidate()	=> ReRegister();
-		void OnEnable()		=> ReRegister();
-
+#if UNITY_EDITOR
+		void OnValidate() => ReRegister();
+#endif
+		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
 
-		private void ReRegister()
+		void ReRegister()
 		{
 			UnRegister();
 
@@ -83,40 +80,33 @@ namespace CREATIVE.SandboxAssets.Events
 					TriggerExitEvent.AddInvoker(gameObject);
 					registeredTriggerExitEvent = TriggerExitEvent;
 				}
-				
-				registered = true;
 			}
 		}
 
-		private void UnRegister()
+		void UnRegister()
 		{
-			if (registered)
+			if (registeredCollisionEnterEvent != null)
 			{
-				if (registeredCollisionEnterEvent != null)
-				{
-					registeredCollisionEnterEvent.DropInvoker(gameObject);
-					registeredCollisionEnterEvent = null;
-				}
-				
-				if (registeredCollisionExitEvent != null)
-				{
-					registeredCollisionExitEvent.DropInvoker(gameObject);
-					registeredCollisionExitEvent = null;
-				}
-				
-				if (registeredTriggerEnterEvent != null)
-				{
-					registeredTriggerEnterEvent.DropInvoker(gameObject);
-					registeredTriggerEnterEvent = null;
-				}
-				
-				if (registeredTriggerExitEvent != null)
-				{
-					registeredTriggerExitEvent.DropInvoker(gameObject);
-					registeredTriggerExitEvent = null;
-				}
-				
-				registered = false;
+				registeredCollisionEnterEvent.DropInvoker(gameObject);
+				registeredCollisionEnterEvent = null;
+			}
+			
+			if (registeredCollisionExitEvent != null)
+			{
+				registeredCollisionExitEvent.DropInvoker(gameObject);
+				registeredCollisionExitEvent = null;
+			}
+			
+			if (registeredTriggerEnterEvent != null)
+			{
+				registeredTriggerEnterEvent.DropInvoker(gameObject);
+				registeredTriggerEnterEvent = null;
+			}
+			
+			if (registeredTriggerExitEvent != null)
+			{
+				registeredTriggerExitEvent.DropInvoker(gameObject);
+				registeredTriggerExitEvent = null;
 			}
 		}
 		

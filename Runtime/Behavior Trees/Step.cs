@@ -5,13 +5,13 @@ using System.Collections.Generic;
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	[type: Serializable]
-	public sealed class Step
+	public class Step
 	{
-		public List<EventToListenFor> EventsToListenFor;
+		public List<EventToListenFor> EventsToListenFor = new List<EventToListenFor>();
 		
-		public bool CompleteOnFirstEvent;
+		public bool CompleteOnFirstEvent = false;
 
-		public List<EventToInvoke> EventsToInvoke;
+		public List<EventToInvoke> EventsToInvoke = new List<EventToInvoke>();
 
 		public ListenerNode CleanCloneAsNodes
 		{

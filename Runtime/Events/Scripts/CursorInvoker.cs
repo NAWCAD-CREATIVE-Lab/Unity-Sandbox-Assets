@@ -26,8 +26,8 @@ namespace CREATIVE.SandboxAssets.Events
 		A seperate Sandbox Event is invoked if the user performs the interact
 		action while looking at an object.
 	*/
-	[RequireComponent(typeof(Camera))]
-	[RequireComponent(typeof(PhysicsRaycaster))]
+	[type: RequireComponent(typeof(Camera))]
+	[type: RequireComponent(typeof(PhysicsRaycaster))]
 	public class CursorInvoker : MonoBehaviour
 	{
 		/**
@@ -36,17 +36,15 @@ namespace CREATIVE.SandboxAssets.Events
 			Raycasts to check for focus on a new object will only be performed
 			after these actions.
 		*/
-		[field: SerializeField]
-		private List<InputActionReference> CursorMoveActions;
-		private List<InputActionReference> registeredCursorMoveActions;
+		[field: SerializeField] List<InputActionReference> CursorMoveActions			= new List<InputActionReference>();
+								List<InputActionReference> registeredCursorMoveActions	= new List<InputActionReference>();
 		
 		/**
 			The input that will be understood as "interacting" with an object in
 			the scene.
 		*/
-		[field: SerializeField]
-		private InputActionReference InteractAction;
-		private InputActionReference registeredInteractAction;
+		[field: SerializeField]	InputActionReference InteractAction				= null;
+								InputActionReference registeredInteractAction	= null;
 		
 		/**
 			This event will be invoked every time the user performs the interact
@@ -54,9 +52,8 @@ namespace CREATIVE.SandboxAssets.Events
 			
 			That GameObject will be supplied as the target of the event.
 		*/
-		[field: SerializeField]
-		private SandboxEvent InteractEvent;
-		private SandboxEvent registeredInteractEvent;
+		[field: SerializeField]	SandboxEvent InteractEvent				= null;
+								SandboxEvent registeredInteractEvent	= null;
 
 		/**
 			This event will be invoked every time the user starts looking at a
@@ -67,23 +64,26 @@ namespace CREATIVE.SandboxAssets.Events
 			The event will not be invoked again for the same object until the
 			user looks away from, and back at, the object.
 		*/
-		[field: SerializeField]
-		private SandboxEvent LookEvent;
-		private SandboxEvent registeredLookEvent;
+		[field: SerializeField]	SandboxEvent LookEvent				= null;
+								SandboxEvent registeredLookEvent	= null;
 
 		/**
 			The object the user is currently looking at.
 		*/
-		[field: SerializeField]
-		private GameObject CurrentlyLooking;
+		[field: SerializeField] GameObject CurrentlyLooking = null;
 
 #if UNITY_EDITOR
+		event Action repaintEditor;
+		
 		/**
 			Custom editor for the SandboxEventCursorInvoker Monobehaviour 
 		*/
-		[CustomEditor(typeof(CursorInvoker))]
-		public class Editor : UnityEditor.Editor
+		[type: CustomEditor(typeof(CursorInvoker))]
+		class Editor : UnityEditor.Editor
 		{
+			void OnEnable()		=> (target as CursorInvoker).repaintEditor += Repaint;
+			void OnDisable()	=> (target as CursorInvoker).repaintEditor -= Repaint;
+			
 			public override void OnInspectorGUI()
 			{
 				serializedObject.Update();
@@ -97,29 +97,27 @@ namespace CREATIVE.SandboxAssets.Events
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(LookEvent)));
 				
 				EditorGUI.BeginDisabledGroup(true);
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(CurrentlyLooking)));
+					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(CurrentlyLooking)));
 				EditorGUI.EndDisabledGroup();
 
 				serializedObject.ApplyModifiedProperties();
 			}
-
-			public override bool RequiresConstantRepaint()
-			{
-				return true;
-			}
 		}
 #endif
 
-		private bool registered = false;
+		bool registered = false;
 
-		void Start()		=> ReRegister();
-		void OnValidate()	=> ReRegister();
-		void OnEnable()		=> ReRegister();
+		void OnEnable() => ReRegister();
+		void Start()	=> ReRegister();
 
+#if UNITY_EDITOR
+		void OnValidate() => ReRegister();
+#endif
+		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
 
-		private void ReRegister()
+		void ReRegister()
 		{
 			UnRegister();
 
@@ -133,8 +131,6 @@ namespace CREATIVE.SandboxAssets.Events
 					
 				if (Application.isPlaying && isActiveAndEnabled)
 				{
-					registeredCursorMoveActions = new List<InputActionReference>();
-
 					foreach (InputActionReference inputActionReference in CursorMoveActions)
 					{
 						if (inputActionReference!=null)
@@ -148,41 +144,54 @@ namespace CREATIVE.SandboxAssets.Events
 						throw new InvalidOperationException
 							("CursorMoveActions must be populated prior to the start of the scene.");
 					
-					InteractEvent.AddInvoker(gameObject);
+					registeredInteractEvent = InteractEvent;
+					registeredInteractEvent.AddInvoker(gameObject);
 
-					LookEvent.AddInvoker(gameObject);
+					registeredLookEvent = LookEvent;
+					registeredLookEvent.AddInvoker(gameObject);
 					
-					InteractAction.action.performed += Interact;
+					registeredInteractAction = InteractAction;
+					registeredInteractAction.action.performed += Interact;
 					
 					registered = true;
 				}
 			}
 		}
 
-		private void UnRegister()
+		void UnRegister()
 		{
-			if (registered)
+			if (registeredInteractEvent != null)
 			{
-				InteractEvent.DropInvoker(gameObject);
-
-				LookEvent.DropInvoker(gameObject);
-				
-				InteractAction.action.performed -= Interact;
-
-				foreach (InputActionReference inputActionReference in CursorMoveActions)
-					inputActionReference.action.performed -= Look;
-				
-				registered = false;
+				registeredInteractEvent.DropInvoker(gameObject);
+				registeredInteractEvent = null;
 			}
+
+			if (registeredLookEvent != null)
+			{
+				registeredLookEvent.DropInvoker(gameObject);
+				registeredLookEvent = null;
+			}
+
+			if (registeredInteractAction != null)
+			{
+				registeredInteractAction.action.performed -= Interact;
+				registeredInteractAction = null;
+			}
+
+			foreach (InputActionReference inputActionReference in registeredCursorMoveActions)
+				inputActionReference.action.performed -= Look;
+			registeredCursorMoveActions.Clear();
+			
+			registered = false;
 		}
 
-		private void Interact(InputAction.CallbackContext context)
+		void Interact(InputAction.CallbackContext context)
 		{
 			if (registered && Application.isPlaying && isActiveAndEnabled && CurrentlyLooking!=null)
-				InteractEvent.Invoke(gameObject, CurrentlyLooking);
+				registeredInteractEvent.Invoke(gameObject, CurrentlyLooking);
 		}
 
-		private void Look(InputAction.CallbackContext context)
+		void Look(InputAction.CallbackContext context)
 		{
 			List<RaycastResult> raycastResults = new List<RaycastResult>();
 
@@ -221,10 +230,15 @@ namespace CREATIVE.SandboxAssets.Events
 				newCurrentlyLooking != null &&
 				newCurrentlyLooking != CurrentlyLooking
 			)
-				LookEvent.Invoke(gameObject, newCurrentlyLooking);
+				registeredLookEvent.Invoke(gameObject, newCurrentlyLooking);
 			
 			// Set the new object the user is looking at
 			CurrentlyLooking = newCurrentlyLooking;
+
+#if UNITY_EDITOR
+			if (repaintEditor != null)
+				repaintEditor();
+#endif
 		}
 	}
 }

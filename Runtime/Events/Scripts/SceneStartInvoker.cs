@@ -17,12 +17,11 @@ namespace CREATIVE.SandboxAssets.Events
 		/**
 			The event to invoke on scene start
 		*/
-		[field: SerializeField]
-		private SandboxEvent SceneStarted;
+		[field: SerializeField] SandboxEvent SceneStarted = null;
 
 		void Start()
 		{
-			if (Application.isPlaying && isActiveAndEnabled)
+			if (Application.isPlaying && isActiveAndEnabled && SceneStarted!=null)
 			{
 				if (FindObjectsByType<SceneStartInvoker>(FindObjectsSortMode.None).Length > 1)
 					Debug.LogWarning

@@ -13,15 +13,16 @@ namespace CREATIVE.SandboxAssets.Events
 	/**
 		A listener for SandboxEvents that can reside in the asset folder
 	*/
+#if UNITY_EDITOR
 	[CreateAssetMenu(fileName = "Event Listener", menuName = "NAWCAD CREATIVE Lab/Sandbox Assets/Event Listener")]
+#endif
 	public class AssetListener : ScriptableObject, Listener
 	{
 		/**
 			The SandboxEvent being listened for
 		*/
-		[field: SerializeField]
-		private SandboxEvent EventToListenFor;
-		public SandboxEvent Event { get { return EventToListenFor; } }
+		[field: SerializeField] SandboxEvent EventToListenFor	= null;
+		public					SandboxEvent Event				{ get { return EventToListenFor; } }
 
 		/**
 			The Object that is listenening, returns this
@@ -34,8 +35,7 @@ namespace CREATIVE.SandboxAssets.Events
 
 			Disabled by default.
 		*/
-		[field: SerializeField]
-		private bool TargetPassThrough = false;
+		[field: SerializeField] bool TargetPassThrough = false;
 
 		/**
 			If this list is null, the listener will work normally
@@ -43,8 +43,7 @@ namespace CREATIVE.SandboxAssets.Events
 			If this list is not null, the listener will only take action from
 			the SandboxEvent if the target of the invocation is in the list
 		*/
-		[field: SerializeField]
-		private List<UnityEngine.Object> RestrictToTargets;
+		[field: SerializeField] List<UnityEngine.Object> RestrictToTargets = new List<UnityEngine.Object>();
 
 		/**
 			Returns RestrictToTargets after filtering out null values and
@@ -78,14 +77,12 @@ namespace CREATIVE.SandboxAssets.Events
 		/**
 			The action that will be taken if TargetPassThrough is false
 		*/
-		[field: SerializeField]
-		private UnityEvent Action;
+		[field: SerializeField] UnityEvent Action = null;
 		
 		/**
 			The action that will be taken if TargetPassThrough is true
 		*/
-		[field: SerializeField]
-		private UnityEvent<UnityEngine.Object> ActionWithTarget;
+		[field: SerializeField] UnityEvent<UnityEngine.Object> ActionWithTarget = null;
 
 		/**
 			If enabled, the user will be allowed to set a second event that will
@@ -98,27 +95,23 @@ namespace CREATIVE.SandboxAssets.Events
 
 			Disabled by default.
 		*/
-		[field: SerializeField]
-		private bool LinkEvent = false;
+		[field: SerializeField] bool LinkEvent = false;
 
 		/**
 			The SandboxEvent that will be invoked as an action if LinkEvent is
 			true
 		*/
-		[field: SerializeField]
-		private SandboxEvent LinkedEvent;
+		[field: SerializeField] SandboxEvent LinkedEvent = null;
 
 #if UNITY_EDITOR
 		/**
 			A custom editor for AssetListener.
 		*/
-		[CustomEditor(typeof(AssetListener))]
-		public class Editor : UnityEditor.Editor
+		[type: CustomEditor(typeof(AssetListener))]
+		class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()
 			{
-				AssetListener listener = target as AssetListener;
-				
 				serializedObject.Update();
 
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.EventToListenFor)));
@@ -129,11 +122,11 @@ namespace CREATIVE.SandboxAssets.Events
 				
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.RestrictToTargets)));
 
-				if (listener.LinkEvent)
+				if (serializedObject.FindProperty(nameof(AssetListener.LinkEvent)).boolValue)
 					EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.LinkedEvent)));
 				else
 				{
-					if (listener.TargetPassThrough)
+					if (serializedObject.FindProperty(nameof(AssetListener.TargetPassThrough)).boolValue)
 						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.ActionWithTarget)));
 					else
 						EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AssetListener.Action)));
@@ -168,7 +161,7 @@ namespace CREATIVE.SandboxAssets.Events
 			return false;
 		}
 
-		private bool TargetPassesFilter(UnityEngine.Object target)
+		bool TargetPassesFilter(UnityEngine.Object target)
 		{
 			if (TargetFilter==null)
 					return true;

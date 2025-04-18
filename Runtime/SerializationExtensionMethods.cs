@@ -11,7 +11,7 @@ namespace CREATIVE.SandboxAssets
 	public static class SerializationExtensionMethods
 	{
 #if UNITY_EDITOR
-		private static readonly InvalidOperationException isNotManagedReferenceException =
+		static readonly InvalidOperationException isNotManagedReferenceException =
 			new InvalidOperationException("This Serialized Property is not a Managed Reference.");
 		
 		public static bool IsManagedReference(this SerializedProperty serializedProperty)

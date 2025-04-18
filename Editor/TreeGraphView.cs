@@ -14,9 +14,11 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 	{
 		public const string UssGuid = "1be56c8321208c245be26dc7f4beb315";
 		
-		private SerializedObject currentSerializedTree;
+		SerializedObject currentSerializedTree = null;
 
-		private TreeGraphViewEntryNode currentEntryNode;
+		TreeGraphViewEntryNode currentEntryNode = null;
+
+		Vector2 localMousePosition = Vector2.zero;
 		
 		public TreeGraphView()
 		{
@@ -28,22 +30,17 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			this.AddManipulator(new RectangleSelector());
 			
 			styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath(UssGuid)));
-		}
 
-		public void ClearView()
-		{
-			graphViewChanged -= OnGraphViewChanged;
-			DeleteElements(graphElements);
 			graphViewChanged += OnGraphViewChanged;
 
-			currentSerializedTree = null;
-			currentEntryNode = null;
-		}
-
-		private void RefreshView()
-		{
-			if (currentSerializedTree != null)
-				PopulateView(currentSerializedTree);
+			RegisterCallback<MouseDownEvent>
+			(
+				mouseDownEvent => localMousePosition =
+					(
+						mouseDownEvent.localMousePosition -
+						new Vector2(viewTransform.position.x, viewTransform.position.y)
+					) / scale
+			);
 		}
 
 		public void PopulateView(SerializedObject serializedTree)
@@ -55,7 +52,12 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				throw new ArgumentException
 					(nameof(serializedTree), nameof(serializedTree) + " does not represent a Behavior Tree.");
 			
-			ClearView();
+			graphViewChanged -= OnGraphViewChanged;
+			DeleteElements(graphElements);
+			graphViewChanged += OnGraphViewChanged;
+
+			currentSerializedTree = null;
+			currentEntryNode = null;
 
 			SerializedProperty nodesProperty = serializedTree.FindProperty(nameof(BehaviorTree.Nodes));
 			for (int i=0; i<nodesProperty.arraySize; i++)
@@ -190,7 +192,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			}
 		}
 
-		private TreeGraphViewNode FindNode(SerializedProperty serializedProperty)
+		TreeGraphViewNode FindNode(SerializedProperty serializedProperty)
 		{
 			foreach (UnityEditor.Experimental.GraphView.Node graphViewNode in nodes)
 			{
@@ -214,21 +216,41 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				(
 					"Add new Listener",
 					(dropdownMenuAction) =>
-						AddElement
-							(new TreeGraphViewListenerNode(this, BehaviorTree.AddListenerNode(currentSerializedTree)))
+					{
+						TreeGraphViewListenerNode listenerNode =
+							new TreeGraphViewListenerNode(this, BehaviorTree.AddListenerNode(currentSerializedTree));
+						
+						AddElement(listenerNode);
+
+						Rect position = listenerNode.GetPosition();
+
+						position.position = localMousePosition;
+						
+						listenerNode.SetPosition(position);
+					}
 				);
 
 				contextualMenuPopulateEvent.menu.AppendAction
 				(
 					"Add new Invoker",
 					(dropdownMenuAction) =>
-						AddElement
-							(new TreeGraphViewInvokerNode(this, BehaviorTree.AddInvokerNode(currentSerializedTree)))
+					{
+						TreeGraphViewInvokerNode invokerNode =
+							new TreeGraphViewInvokerNode(this, BehaviorTree.AddInvokerNode(currentSerializedTree));
+						
+						AddElement(invokerNode);
+
+						Rect position = invokerNode.GetPosition();
+
+						position.position = localMousePosition;
+						
+						invokerNode.SetPosition(position);
+					}
 				);
 			}
 		}
 
-		private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
+		GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
 		{
 			if (currentSerializedTree!=null)
 			{
@@ -331,7 +353,8 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			
 			currentSerializedTree.ApplyModifiedProperties();
 
-			RefreshView();
+			if (currentSerializedTree != null)
+				PopulateView(currentSerializedTree);
 			
 			return graphViewChange;
 		}

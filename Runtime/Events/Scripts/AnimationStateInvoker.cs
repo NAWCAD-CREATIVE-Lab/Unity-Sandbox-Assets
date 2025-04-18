@@ -14,11 +14,8 @@ namespace CREATIVE.SandboxAssets.Events
 	*/
 	public class AnimationStateInvoker : StateMachineBehaviour
 	{
-		[field: SerializeField]
-		private SandboxEvent EventOnStateEnter;
-		
-		[field: SerializeField]
-		private SandboxEvent EventOnStateExit;
+		[field: SerializeField] SandboxEvent EventOnStateEnter = null;
+		[field: SerializeField] SandboxEvent EventOnStateExit = null;
 
 		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 		{

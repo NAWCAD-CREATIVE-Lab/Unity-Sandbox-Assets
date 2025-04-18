@@ -16,10 +16,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 	public class BehaviorTree : ScriptableObject
 	{
 		[SerializeReference]
-		public List<Node> Nodes;
+		public List<Node> Nodes = new List<Node>();
 
 		[SerializeReference]
-		public Node RootNode;
+		public Node RootNode = null;
 
 		public void CleanCloneFrom(BehaviorTree source)
 		{

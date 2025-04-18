@@ -6,17 +6,17 @@ using UnityEngine;
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	[type: Serializable]
-	public sealed class ListenerNode : Node
+	public class ListenerNode : Node
 	{
 		[field: SerializeReference]
-		public Node NextNode;
+		public Node NextNode = null;
 		
-		public bool BranchOnCompletion;
+		public bool BranchOnCompletion = false;
 		
-		public bool CompleteOnFirstEvent;
+		public bool CompleteOnFirstEvent = false;
 		
 		[field: SerializeReference]
-		public List<EventToListenForWithBranch> EventsToListenFor;
+		public List<EventToListenForWithBranch> EventsToListenFor = new List<EventToListenForWithBranch>();
 
 		public ListenerNode CleanCloneWithoutNextNodes
 		{
