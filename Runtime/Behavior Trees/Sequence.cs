@@ -99,15 +99,21 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 					else
 					{
-						Dictionary<EventToListenFor, Dictionary<ListenerNode, EventToListenFor>> delegateListenerSetupInfo =
-							new Dictionary<EventToListenFor, Dictionary<ListenerNode, EventToListenFor>>();
+						Dictionary<EventToListenFor, Dictionary<ListenerNode, EventToListenFor>>
+							delegateListenerSetupInfo =
+								new Dictionary<EventToListenFor, Dictionary<ListenerNode, EventToListenFor>>();
 
 						ListenerNode listenerNodeIterator = currentNode;
 						while (listenerNodeIterator != null)
 						{
-							registeredListenerStatusIndex.Add(listenerNodeIterator, new Dictionary<EventToListenFor, bool>());
+							registeredListenerStatusIndex.Add
+								(listenerNodeIterator, new Dictionary<EventToListenFor, bool>());
 
-							foreach (EventToListenForWithBranch eventToListenForWithBranch in listenerNodeIterator.EventsToListenFor)
+							foreach
+							(
+								EventToListenForWithBranch eventToListenForWithBranch in
+								listenerNodeIterator.EventsToListenFor
+							)
 							{
 								EventToListenFor eventToListenFor = new EventToListenFor(eventToListenForWithBranch);
 
@@ -116,9 +122,11 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 								foreach (EventToListenFor eventToListenForSegment in eventToListenFor.TargetSegements)
 								{
 									if (!delegateListenerSetupInfo.ContainsKey(eventToListenForSegment))
-										delegateListenerSetupInfo.Add(eventToListenForSegment, new Dictionary<ListenerNode, EventToListenFor>());
+										delegateListenerSetupInfo.Add
+											(eventToListenForSegment, new Dictionary<ListenerNode, EventToListenFor>());
 									
-									delegateListenerSetupInfo[eventToListenForSegment].Add(listenerNodeIterator, eventToListenFor);
+									delegateListenerSetupInfo[eventToListenForSegment]
+										.Add(listenerNodeIterator, eventToListenFor);
 								}
 							}
 
@@ -136,7 +144,8 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 						foreach (EventToListenFor eventToListenFor in delegateListenerSetupInfo.Keys)
 						{
-							Dictionary<ListenerNode, EventToListenFor> listeningNodeInfoIndex = delegateListenerSetupInfo[eventToListenFor];
+							Dictionary<ListenerNode, EventToListenFor> listeningNodeInfoIndex =
+								delegateListenerSetupInfo[eventToListenFor];
 							
 							registeredEventListeners.Add
 							(
@@ -155,7 +164,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 						currentStep = 1;
 					}
-
+					
 					registered = true;
 				}
 

@@ -24,6 +24,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			{
 				ListenerNode copy = new ListenerNode();
 
+#if UNITY_EDITOR
+				copy.Position = new Vector2() { x=Position.x, y=Position.y };
+#endif
+
 				copy.BranchOnCompletion = BranchOnCompletion;
 
 				copy.CompleteOnFirstEvent = CompleteOnFirstEvent;

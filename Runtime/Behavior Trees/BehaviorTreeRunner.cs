@@ -12,6 +12,12 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	public class BehaviorTreeRunner : MonoBehaviour
 	{
+		public event Action BehaviorTreeActivated;
+
+		public event Action BehaviorTreeDeactivated;
+		
+		public event Action ActiveBehaviorTreeCurrentNodeChanged;
+		
 		[field: SerializeField]	BehaviorTree BehaviorTree			= null;
 								BehaviorTree registeredBehaviorTree	= null;
 
@@ -35,6 +41,37 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 		
 		void OnDisable()	=> UnRegister();
 		void OnDestroy()	=> UnRegister();
+
+		public bool BehaviorTreeIsSet { get { return BehaviorTree != null; } }
+		
+		public SerializedObject InactiveBehaviorTree
+		{
+			get
+			{
+				if (BehaviorTree == null)
+					throw new InvalidOperationException
+						(nameof(InactiveBehaviorTree) + " can only be called when Behavior Tree is set.");
+				
+				return new SerializedObject(BehaviorTree);
+			}
+		}
+
+		public bool BehaviorTreeIsActive { get { return registered; } }
+
+		public void CloneActiveBehaviorTree(BehaviorTree behaviorTreeToCloneTo, out Node currentNode)
+		{
+			if (!registered)
+				throw new InvalidOperationException
+					(nameof(CloneActiveBehaviorTree) + " can only be called when Behavior Tree is active.");
+			
+			behaviorTreeToCloneTo.CleanCloneFrom(registeredBehaviorTree);
+
+			if (this.currentNode!=null)
+					currentNode = behaviorTreeToCloneTo.Nodes[registeredBehaviorTree.Nodes.IndexOf(this.currentNode)];
+				
+			else
+				currentNode = null;
+		}
 
 		void ReRegister()
 		{
@@ -128,6 +165,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				currentNode = registeredBehaviorTree.RootNode;
 				
 				EvaluateCurrentNode();
+
+				if (BehaviorTreeActivated != null)
+					BehaviorTreeActivated();
 			}
 		}
 
@@ -135,7 +175,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 		{
 			if (registeredBehaviorTree != null)
 			{
-				Destroy(registeredBehaviorTree);
+				ScriptableObject.DestroyImmediate(registeredBehaviorTree);
 				registeredBehaviorTree = null;
 			}
 
@@ -150,6 +190,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			registeredEventListeners.Clear();
 
 			registered = false;
+
+			if (BehaviorTreeDeactivated != null)
+				BehaviorTreeDeactivated();
 		}
 
 		void EvaluateCurrentNode()
@@ -222,6 +265,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 							listenerNode.NextNode;
 
 					EvaluateCurrentNode();
+
+					if (ActiveBehaviorTreeCurrentNodeChanged != null)
+						ActiveBehaviorTreeCurrentNodeChanged();
 				}
 			}
 

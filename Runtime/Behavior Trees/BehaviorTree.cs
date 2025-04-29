@@ -35,6 +35,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			if (!source.Nodes.Contains(source.RootNode))
 				throw new InvalidOperationException(nameof(source.Nodes) + " does not contain the Root Node.");
 
+#if UNITY_EDITOR
+			EntryNodePosition = new Vector2() { x=source.EntryNodePosition.x, y=source.EntryNodePosition.y };
+#endif
+
 			Nodes = new List<Node>(source.Nodes);
 
 			Nodes.Remove(source.RootNode);
@@ -52,10 +56,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 		[type: CustomEditor(typeof(BehaviorTree))]
 		public class Inspector : Editor
 		{
-			public override VisualElement CreateInspectorGUI()
-			{
-				return new VisualElement();
-			}
+			public override VisualElement CreateInspectorGUI() => new VisualElement();
 		}
 		
 		public static SerializedProperty AddListenerNode(SerializedObject serializedTree)

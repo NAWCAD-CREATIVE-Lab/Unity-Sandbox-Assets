@@ -12,19 +12,86 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
 	public class TreeGraphViewEntryNode : UnityEditor.Experimental.GraphView.Node
 	{
+		readonly SerializedProperty entryNodePositionProperty;
+		
 		public readonly Port RootNodePort;
 
-		public readonly SerializedProperty RootNodeProperty;
+		public readonly bool ReadOnly;
 
-		SerializedProperty entryNodePositionProperty = null;
+		readonly SerializedProperty rootNodeProperty;
+		public SerializedProperty RootNodeProperty
+		{
+			get
+			{
+				if (ReadOnly)
+					throw new InvalidOperationException
+					(
+						"Something tried to get the Root Node Serialized Property " + 
+						"of a Tree Graph View Entry Node that is Read Only."
+					);
+				
+				return rootNodeProperty;
+			}
+		}
 
-		public bool RootNodeIsSet { get { return !RootNodeProperty.ManagedReferenceIsNull(); } }
+		public readonly Node rootNode;
+		public Node RootNode
+		{
+			get
+			{
+				if (ReadOnly)
+					return rootNode;
+				
+				return rootNodeProperty.managedReferenceValue as Node;
+			}
+		}
+
+		public bool RootNodeIsSet
+		{
+			get
+			{
+				if (ReadOnly)
+					return rootNode != null;
+				
+				return !RootNodeProperty.ManagedReferenceIsNull();
+			}
+		}
+
+		TreeGraphViewEntryNode()
+		{
+			this.title = "Entry";
+
+			RootNodePort =
+				InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Node));
+			RootNodePort.portName = null;
+			outputContainer.Add(RootNodePort);
+
+			RefreshExpandedState();
+		}
+
+		public TreeGraphViewEntryNode
+		(
+			Node rootNode,
+			Vector2 position
+		) : this()
+		{
+			ReadOnly = true;
+			
+			this.rootNode = rootNode;
+
+			this.rootNodeProperty = null;
+
+			style.left = position.x;
+			style.top = position.y;
+
+			RootNodePort.SetEnabled(false);
+		}
 
 		public TreeGraphViewEntryNode
 		(
 			SerializedProperty rootNodeProperty,
 			SerializedProperty entryNodePositionProperty
-		)
+		) : this()
 		{
 			if (rootNodeProperty == null)
 				throw new ArgumentNullException(nameof(rootNodeProperty));
@@ -39,23 +106,18 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 					nameof(entryNodePositionProperty) + " does not represent a Vector 2."
 				);
 			
-			this.title = "Entry";
+			ReadOnly = false;
 
-			RootNodeProperty = rootNodeProperty;
+			this.rootNode = null;
+
+			this.rootNodeProperty = rootNodeProperty;
 
 			this.entryNodePositionProperty = entryNodePositionProperty;
-
-			RootNodePort =
-				InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Node));
-			RootNodePort.portName = null;
-			outputContainer.Add(RootNodePort);
 
 			Vector2 position = entryNodePositionProperty.vector2Value;
 
 			style.left = position.x;
 			style.top = position.y;
-
-			RefreshExpandedState();
 		}
 
 		override public void SetPosition(Rect newPosition)

@@ -20,6 +20,10 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			{
 				InvokerNode copy = new InvokerNode();
 
+#if UNITY_EDITOR
+				copy.Position = new Vector2() { x=Position.x, y=Position.y };
+#endif
+
 				copy.EventsToInvoke = new List<EventToInvoke>();
 				if (EventsToInvoke != null)
 				{

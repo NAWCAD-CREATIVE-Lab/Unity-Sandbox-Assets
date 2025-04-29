@@ -85,8 +85,8 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 						EventToListenForWithBranch eventToListenForWithBranch = listenerNode.EventsToListenFor.Find
 						(
 							(eventToListenForWithBranchCandidate) =>
-							(new EventToListenFor(eventToListenForWithBranchCandidate)).Equals
-									(new EventToListenFor(eventToListenForWithBranchClone))
+								(new EventToListenFor(eventToListenForWithBranchCandidate)).Equals
+										(new EventToListenFor(eventToListenForWithBranchClone))
 						);
 
 						if (eventToListenForWithBranch.NextNode != null)

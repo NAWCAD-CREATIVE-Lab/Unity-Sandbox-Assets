@@ -12,9 +12,20 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 	[UxmlElement]
 	public partial class TreeGraphView : GraphView
 	{
-		public const string UssGuid = "1be56c8321208c245be26dc7f4beb315";
+		const string UssGuid = "1be56c8321208c245be26dc7f4beb315";
+
+		readonly IManipulator selectionDragger	= new SelectionDragger();
+		readonly IManipulator rectangleSelector	= new RectangleSelector();
+
+		bool populated = false;
+
+		bool readOnly = false;
 		
 		SerializedObject currentSerializedTree = null;
+
+		BehaviorTreeRunner currentBehaviorTreeRunner = null;
+
+		BehaviorTree currentBehaviorTree = null;
 
 		TreeGraphViewEntryNode currentEntryNode = null;
 
@@ -26,24 +37,145 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 			this.AddManipulator(new ContentZoomer());
 			this.AddManipulator(new ContentDragger());
-			this.AddManipulator(new SelectionDragger());
-			this.AddManipulator(new RectangleSelector());
 			
 			styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath(UssGuid)));
 
+			RegisterCallback<MouseDownEvent>(UpdateLocalMousePosition);
+
 			graphViewChanged += OnGraphViewChanged;
 
-			RegisterCallback<MouseDownEvent>
-			(
-				mouseDownEvent => localMousePosition =
-					(
-						mouseDownEvent.localMousePosition -
-						new Vector2(viewTransform.position.x, viewTransform.position.y)
-					) / scale
-			);
+			Selection.selectionChanged += PopulateSelection;
+
+			currentBehaviorTree = ScriptableObject.CreateInstance(typeof(BehaviorTree)) as BehaviorTree;
 		}
 
-		public void PopulateView(SerializedObject serializedTree)
+		~TreeGraphView()
+		{
+			UnregisterCallback<MouseDownEvent>(UpdateLocalMousePosition);
+			
+			graphViewChanged -= OnGraphViewChanged;
+			
+			Selection.selectionChanged -= PopulateSelection;
+
+			ScriptableObject.DestroyImmediate(currentBehaviorTree);
+		}
+
+		void UpdateLocalMousePosition(MouseDownEvent mouseDownEvent)
+		{
+			localMousePosition =
+			(
+				mouseDownEvent.localMousePosition -
+				new Vector2(viewTransform.position.x, viewTransform.position.y)
+			) / scale;
+		}
+
+		public void PopulateSelection()
+		{
+			UnityEngine.Object selectedObject = Selection.activeObject;
+
+			if (selectedObject!=null)
+			{
+				if (selectedObject is BehaviorTree)
+					Populate(new SerializedObject(selectedObject));
+				
+				else if (selectedObject is GameObject)
+				{
+					BehaviorTreeRunner behaviorTreeRunner =
+						(selectedObject as GameObject).GetComponent<BehaviorTreeRunner>();
+					
+					if (behaviorTreeRunner != null)
+						Populate(behaviorTreeRunner);
+				}
+			}
+		}
+
+		void UnPopulate()
+		{
+			this.RemoveManipulator(selectionDragger);
+			this.RemoveManipulator(rectangleSelector);
+			
+			graphViewChanged -= OnGraphViewChanged;
+			DeleteElements(graphElements);
+			graphViewChanged += OnGraphViewChanged;
+
+			if (currentBehaviorTreeRunner != null)
+			{
+				currentBehaviorTreeRunner.BehaviorTreeActivated -= RefreshBehaviorTreeInRunner;
+
+				currentBehaviorTreeRunner.BehaviorTreeDeactivated -= EditBehaviorTreeInRunner;
+				
+				currentBehaviorTreeRunner.ActiveBehaviorTreeCurrentNodeChanged -= RefreshBehaviorTreeInRunner;
+
+				currentBehaviorTreeRunner = null;
+			}
+
+			currentSerializedTree = null;
+			
+			currentEntryNode = null;
+
+			populated = false;
+		}
+
+		void RefreshBehaviorTreeInRunner() => Populate(currentBehaviorTreeRunner);
+
+		void Populate(BehaviorTreeRunner behaviorTreeRunner)
+		{
+			if (behaviorTreeRunner.BehaviorTreeIsSet)
+			{
+				UnPopulate();
+				
+				currentBehaviorTreeRunner = behaviorTreeRunner;
+
+				currentBehaviorTreeRunner.BehaviorTreeActivated += RefreshBehaviorTreeInRunner;
+
+				currentBehaviorTreeRunner.BehaviorTreeDeactivated += EditBehaviorTreeInRunner;
+				
+				currentBehaviorTreeRunner.ActiveBehaviorTreeCurrentNodeChanged += RefreshBehaviorTreeInRunner;
+				
+				if (currentBehaviorTreeRunner.BehaviorTreeIsActive)
+				{
+					Node currentNode;
+					
+					currentBehaviorTreeRunner.CloneActiveBehaviorTree(currentBehaviorTree, out currentNode);
+
+					foreach (Node node in currentBehaviorTree.Nodes)
+					{
+						if (node is ListenerNode)
+						{
+							if (node == currentNode)
+								AddElement(new TreeGraphViewListenerNode(this, node as ListenerNode, true));
+
+							else
+								AddElement(new TreeGraphViewListenerNode(this, node as ListenerNode));
+						}
+						
+						else if (node is InvokerNode)
+							AddElement(new TreeGraphViewInvokerNode(this, node as InvokerNode));
+					}
+
+					currentEntryNode = new TreeGraphViewEntryNode
+					(
+						currentBehaviorTree.RootNode,
+						currentBehaviorTree.EntryNodePosition
+					);
+
+					AddElement(currentEntryNode);
+
+					readOnly = true;
+
+					populated = true;
+				
+					ReDrawEdges();
+				}
+
+				else
+					EditBehaviorTreeInRunner();
+			}
+		}
+
+		void EditBehaviorTreeInRunner() => Populate(currentBehaviorTreeRunner.InactiveBehaviorTree);
+
+		void Populate(SerializedObject serializedTree)
 		{
 			if (serializedTree == null)
 				throw new ArgumentNullException(nameof(serializedTree));
@@ -52,12 +184,7 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				throw new ArgumentException
 					(nameof(serializedTree), nameof(serializedTree) + " does not represent a Behavior Tree.");
 			
-			graphViewChanged -= OnGraphViewChanged;
-			DeleteElements(graphElements);
-			graphViewChanged += OnGraphViewChanged;
-
-			currentSerializedTree = null;
-			currentEntryNode = null;
+			UnPopulate();
 
 			SerializedProperty nodesProperty = serializedTree.FindProperty(nameof(BehaviorTree.Nodes));
 			for (int i=0; i<nodesProperty.arraySize; i++)
@@ -83,13 +210,20 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			AddElement(currentEntryNode);
 
 			currentSerializedTree = serializedTree;
+
+			this.AddManipulator(selectionDragger);
+			this.AddManipulator(rectangleSelector);
+
+			populated = true;
+
+			readOnly = false;
 			
 			ReDrawEdges();
 		}
 
 		public void ReDrawEdges()
 		{
-			if (currentSerializedTree != null)
+			if (populated)
 			{
 				graphViewChanged -= OnGraphViewChanged;
 				
@@ -107,23 +241,51 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 					{
 						TreeGraphViewNode treeNodeView = node as TreeGraphViewNode;
 
-						if (treeNodeView.NodeProperty.ManagedReferenceEquals(currentEntryNode.RootNodeProperty))
+						if
+						(
+							currentEntryNode.RootNodeIsSet &&
+							(
+								(
+									readOnly &&
+									treeNodeView.Node==currentEntryNode.RootNode
+								) ||
+								(
+									!readOnly &&
+									treeNodeView.NodeProperty.ManagedReferenceEquals(currentEntryNode.RootNodeProperty)
+								)
+							)
+						)
 							AddElement(currentEntryNode.RootNodePort.ConnectTo(treeNodeView.PreviousNodePort));
 					
 						if (treeNodeView is TreeGraphViewInvokerNode)
 						{
 							TreeGraphViewInvokerNode invokerNodeView = treeNodeView as TreeGraphViewInvokerNode;
 
-							SerializedProperty nextNodeReferenceProperty =
-								invokerNodeView.NodeProperty.FindPropertyRelative(nameof(InvokerNode.NextNode));
-
-							if (!nextNodeReferenceProperty.ManagedReferenceIsNull())
+							if (readOnly)
 							{
-								TreeGraphViewNode nextTreeNodeView = FindNode(nextNodeReferenceProperty);
+								if (invokerNodeView.InvokerNode.NextNode != null)
+								{
+									TreeGraphViewNode nextTreeNodeView = FindNode(invokerNodeView.InvokerNode.NextNode);
 
-								if (nextTreeNodeView != null)
-									AddElement
-										(invokerNodeView.NextNodePort.ConnectTo(nextTreeNodeView.PreviousNodePort));
+									if (nextTreeNodeView != null)
+										AddElement
+											(invokerNodeView.NextNodePort.ConnectTo(nextTreeNodeView.PreviousNodePort));
+								}
+							}
+
+							else
+							{
+								SerializedProperty nextNodeReferenceProperty =
+									invokerNodeView.NodeProperty.FindPropertyRelative(nameof(InvokerNode.NextNode));
+
+								if (!nextNodeReferenceProperty.ManagedReferenceIsNull())
+								{
+									TreeGraphViewNode nextTreeNodeView = FindNode(nextNodeReferenceProperty);
+
+									if (nextTreeNodeView != null)
+										AddElement
+											(invokerNodeView.NextNodePort.ConnectTo(nextTreeNodeView.PreviousNodePort));
+								}
 							}
 						}
 
@@ -131,35 +293,41 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 						{
 							TreeGraphViewListenerNode listenerNodeView = treeNodeView as TreeGraphViewListenerNode;
 
-							if
-							(
-								listenerNodeView
-									.NodeProperty
-									.FindPropertyRelative(nameof(ListenerNode.BranchOnCompletion))
-									.boolValue
-							)
+							if (readOnly)
 							{
-								SerializedProperty eventsToListenForProperty =
-									listenerNodeView.NodeProperty.FindPropertyRelative
-										(nameof(ListenerNode.EventsToListenFor));
-								
-								for (int i=0; i<eventsToListenForProperty.arraySize; i++)
+								if (listenerNodeView.ListenerNode.BranchOnCompletion)
 								{
-									SerializedProperty eventToListenForProperty =
-										eventsToListenForProperty.GetArrayElementAtIndex(i);
-									
-									SerializedProperty nextNodeReferenceProperty =
-										eventToListenForProperty
-										.FindPropertyRelative(nameof(EventToListenForWithBranch.NextNode));
-									
-									if (!nextNodeReferenceProperty.ManagedReferenceIsNull())
+									foreach
+									(
+										EventToListenForWithBranch eventToListenFor in
+										listenerNodeView.ListenerNode.EventsToListenFor
+									)
 									{
-										TreeGraphViewNode nextTreeNodeView = FindNode(nextNodeReferenceProperty);
+										if (eventToListenFor.NextNode != null)
+										{
+											TreeGraphViewNode nextTreeNodeView = FindNode(eventToListenFor.NextNode);
 
+											if (nextTreeNodeView != null)
+												AddElement
+												(
+													listenerNodeView.GetPort(eventToListenFor).ConnectTo
+														(nextTreeNodeView.PreviousNodePort)
+												);
+										}
+									}
+								}
+
+								else
+								{
+									if (listenerNodeView.ListenerNode.NextNode != null)
+									{
+										TreeGraphViewNode nextTreeNodeView =
+											FindNode(listenerNodeView.ListenerNode.NextNode);
+										
 										if (nextTreeNodeView != null)
 											AddElement
 											(
-												listenerNodeView.GetPort(eventToListenForProperty).ConnectTo
+												listenerNodeView.NextNodePort.ConnectTo
 													(nextTreeNodeView.PreviousNodePort)
 											);
 									}
@@ -168,25 +336,68 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 							else
 							{
-								SerializedProperty nextNodeReferenceProperty =
+								if
+								(
 									listenerNodeView
-									.NodeProperty
-									.FindPropertyRelative(nameof(ListenerNode.NextNode));
-								
-								if (!nextNodeReferenceProperty.ManagedReferenceIsNull())
+										.NodeProperty
+										.FindPropertyRelative(nameof(ListenerNode.BranchOnCompletion))
+										.boolValue
+								)
 								{
-									TreeGraphViewNode nextTreeNodeView = FindNode(nextNodeReferenceProperty);
+									SerializedProperty eventsToListenForProperty =
+										listenerNodeView.NodeProperty.FindPropertyRelative
+											(nameof(ListenerNode.EventsToListenFor));
+									
+									for (int i=0; i<eventsToListenForProperty.arraySize; i++)
+									{
+										SerializedProperty eventToListenForProperty =
+											eventsToListenForProperty.GetArrayElementAtIndex(i);
+										
+										SerializedProperty nextNodeReferenceProperty =
+											eventToListenForProperty
+											.FindPropertyRelative(nameof(EventToListenForWithBranch.NextNode));
+										
+										if (!nextNodeReferenceProperty.ManagedReferenceIsNull())
+										{
+											TreeGraphViewNode nextTreeNodeView = FindNode(nextNodeReferenceProperty);
 
-									if (nextTreeNodeView != null)
-										AddElement
-										(
-											listenerNodeView.NextNodePort.ConnectTo(nextTreeNodeView.PreviousNodePort)
-										);
+											if (nextTreeNodeView != null)
+												AddElement
+												(
+													listenerNodeView.GetPort(eventToListenForProperty).ConnectTo
+														(nextTreeNodeView.PreviousNodePort)
+												);
+										}
+									}
+								}
+
+								else
+								{
+									SerializedProperty nextNodeReferenceProperty =
+										listenerNodeView
+										.NodeProperty
+										.FindPropertyRelative(nameof(ListenerNode.NextNode));
+									
+									if (!nextNodeReferenceProperty.ManagedReferenceIsNull())
+									{
+										TreeGraphViewNode nextTreeNodeView = FindNode(nextNodeReferenceProperty);
+
+										if (nextTreeNodeView != null)
+											AddElement
+											(
+												listenerNodeView.NextNodePort.ConnectTo
+													(nextTreeNodeView.PreviousNodePort)
+											);
+									}
 								}
 							}
 						}
 					}
 				}
+
+				if (readOnly)
+					foreach (Edge edge in edges)
+						edge.SetEnabled(false);
 
 				graphViewChanged += OnGraphViewChanged;
 			}
@@ -208,9 +419,25 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			return null;
 		}
 
+		TreeGraphViewNode FindNode(Node node)
+		{
+			foreach (UnityEditor.Experimental.GraphView.Node graphViewNode in nodes)
+			{
+				if (graphViewNode is TreeGraphViewNode)
+				{
+					TreeGraphViewNode treeGraphViewNode = graphViewNode as TreeGraphViewNode;
+
+					if (node == treeGraphViewNode.Node)
+						return treeGraphViewNode;
+				}
+			}
+
+			return null;
+		}
+
 		override public void BuildContextualMenu(ContextualMenuPopulateEvent contextualMenuPopulateEvent)
 		{
-			if (currentSerializedTree != null)
+			if (populated && !readOnly)
 			{
 				contextualMenuPopulateEvent.menu.AppendAction
 				(
@@ -252,78 +479,44 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 
 		GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
 		{
-			if (currentSerializedTree!=null)
+			if (populated)
 			{
-				if (graphViewChange.elementsToRemove!=null)
+				if (readOnly)
 				{
-					List<SerializedProperty> nodesToRemove = new List<SerializedProperty>();
+					if (graphViewChange.edgesToCreate != null)
+						graphViewChange.edgesToCreate.Clear();
+
+					if (graphViewChange.elementsToRemove != null)
+						graphViewChange.elementsToRemove.Clear();
 					
-					foreach (GraphElement graphElement in graphViewChange.elementsToRemove)
-					{
-						if (graphElement is TreeGraphViewNode)
-							nodesToRemove.Add((graphElement as TreeGraphViewNode).NodeProperty);
-						
-						else if (graphElement is Edge)
-						{
-							Port output = (graphElement as Edge).output;
-
-							TreeGraphViewNode previousViewNode = output.node as TreeGraphViewNode;
-
-							if (previousViewNode is TreeGraphViewInvokerNode)
-								previousViewNode
-									.NodeProperty
-									.FindPropertyRelative(nameof(InvokerNode.NextNode))
-									.SetManagedReferenceNull();
-							
-							else if (previousViewNode is TreeGraphViewListenerNode)
-							{
-								if
-								(
-									previousViewNode
-										.NodeProperty
-										.FindPropertyRelative(nameof(ListenerNode.BranchOnCompletion))
-										.boolValue
-								)
-									(previousViewNode as TreeGraphViewListenerNode)
-										.GetEventToListenForProperty(output)
-										.FindPropertyRelative(nameof(EventToListenForWithBranch.NextNode))
-										.SetManagedReferenceNull();
-								
-								else
-									previousViewNode
-										.NodeProperty
-										.FindPropertyRelative(nameof(ListenerNode.NextNode))
-										.SetManagedReferenceNull();
-							}
-						}
-					}
-
-					if (nodesToRemove.Count > 0)
-						BehaviorTree.RemoveNodes(nodesToRemove);
+					if (graphViewChange.movedElements != null)
+						graphViewChange.movedElements.Clear();
+					
+					graphViewChange.moveDelta = Vector2.zero;
 				}
-				
-				if (graphViewChange.edgesToCreate != null)
+			
+				else
 				{
-					foreach (Edge edge in graphViewChange.edgesToCreate)
+					if (graphViewChange.elementsToRemove!=null)
 					{
-						if (edge.input.node is TreeGraphViewNode)
+						List<SerializedProperty> nodesToRemove = new List<SerializedProperty>();
+						
+						foreach (GraphElement graphElement in graphViewChange.elementsToRemove)
 						{
-							SerializedProperty nextNodeProperty = (edge.input.node as TreeGraphViewNode).NodeProperty;
+							if (graphElement is TreeGraphViewNode)
+								nodesToRemove.Add((graphElement as TreeGraphViewNode).NodeProperty);
 							
-							if (edge.output.node is TreeGraphViewEntryNode)
-								(edge.output.node as TreeGraphViewEntryNode)
-									.RootNodeProperty
-									.SetManagedReference(nextNodeProperty);
-							
-							else if (edge.output.node is TreeGraphViewNode)
+							else if (graphElement is Edge)
 							{
-								TreeGraphViewNode previousViewNode = edge.output.node as TreeGraphViewNode;
+								Port output = (graphElement as Edge).output;
+
+								TreeGraphViewNode previousViewNode = output.node as TreeGraphViewNode;
 
 								if (previousViewNode is TreeGraphViewInvokerNode)
 									previousViewNode
 										.NodeProperty
 										.FindPropertyRelative(nameof(InvokerNode.NextNode))
-										.SetManagedReference(nextNodeProperty);
+										.SetManagedReferenceNull();
 								
 								else if (previousViewNode is TreeGraphViewListenerNode)
 								{
@@ -335,26 +528,78 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 											.boolValue
 									)
 										(previousViewNode as TreeGraphViewListenerNode)
-											.GetEventToListenForProperty(edge.output)
+											.GetEventToListenForProperty(output)
 											.FindPropertyRelative(nameof(EventToListenForWithBranch.NextNode))
-											.SetManagedReference(nextNodeProperty);
+											.SetManagedReferenceNull();
 									
 									else
 										previousViewNode
 											.NodeProperty
 											.FindPropertyRelative(nameof(ListenerNode.NextNode))
+											.SetManagedReferenceNull();
+								}
+							}
+						}
+
+						if (nodesToRemove.Count > 0)
+							BehaviorTree.RemoveNodes(nodesToRemove);
+					}
+					
+					if (graphViewChange.edgesToCreate != null)
+					{
+						foreach (Edge edge in graphViewChange.edgesToCreate)
+						{
+							if (edge.input.node is TreeGraphViewNode)
+							{
+								SerializedProperty nextNodeProperty =
+									(edge.input.node as TreeGraphViewNode).NodeProperty;
+								
+								if (edge.output.node is TreeGraphViewEntryNode)
+									(edge.output.node as TreeGraphViewEntryNode)
+										.RootNodeProperty
+										.SetManagedReference(nextNodeProperty);
+								
+								else if (edge.output.node is TreeGraphViewNode)
+								{
+									TreeGraphViewNode previousViewNode = edge.output.node as TreeGraphViewNode;
+
+									if (previousViewNode is TreeGraphViewInvokerNode)
+										previousViewNode
+											.NodeProperty
+											.FindPropertyRelative(nameof(InvokerNode.NextNode))
 											.SetManagedReference(nextNodeProperty);
+									
+									else if (previousViewNode is TreeGraphViewListenerNode)
+									{
+										if
+										(
+											previousViewNode
+												.NodeProperty
+												.FindPropertyRelative(nameof(ListenerNode.BranchOnCompletion))
+												.boolValue
+										)
+											(previousViewNode as TreeGraphViewListenerNode)
+												.GetEventToListenForProperty(edge.output)
+												.FindPropertyRelative(nameof(EventToListenForWithBranch.NextNode))
+												.SetManagedReference(nextNodeProperty);
+										
+										else
+											previousViewNode
+												.NodeProperty
+												.FindPropertyRelative(nameof(ListenerNode.NextNode))
+												.SetManagedReference(nextNodeProperty);
+									}
 								}
 							}
 						}
 					}
+
+					currentSerializedTree.ApplyModifiedProperties();
+
+					if (currentSerializedTree != null)
+						Populate(currentSerializedTree);
 				}
 			}
-			
-			currentSerializedTree.ApplyModifiedProperties();
-
-			if (currentSerializedTree != null)
-				PopulateView(currentSerializedTree);
 			
 			return graphViewChange;
 		}

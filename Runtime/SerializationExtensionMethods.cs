@@ -16,11 +16,17 @@ namespace CREATIVE.SandboxAssets
 		
 		public static bool IsManagedReference(this SerializedProperty serializedProperty)
 		{
+			if (serializedProperty == null)
+				throw new ArgumentNullException(nameof(serializedProperty));
+			
 			return serializedProperty.propertyType == SerializedPropertyType.ManagedReference;
 		}
 		
 		public static bool ManagedReferenceIsNull(this SerializedProperty serializedProperty)
 		{
+			if (serializedProperty == null)
+				throw new ArgumentNullException(nameof(serializedProperty));
+			
 			if (!serializedProperty.IsManagedReference())
 				throw isNotManagedReferenceException;
 			
@@ -29,6 +35,9 @@ namespace CREATIVE.SandboxAssets
 
 		public static void SetManagedReferenceNull(this SerializedProperty serializedProperty)
 		{
+			if (serializedProperty == null)
+				throw new ArgumentNullException(nameof(serializedProperty));
+			
 			if (!serializedProperty.IsManagedReference())
 				throw isNotManagedReferenceException;
 			
@@ -37,6 +46,9 @@ namespace CREATIVE.SandboxAssets
 		
 		public static bool ManagedReferenceIsOfType(this SerializedProperty serializedProperty, Type managedReferenceType)
 		{
+			if (serializedProperty == null)
+				throw new ArgumentNullException(nameof(serializedProperty));
+			
 			if (!serializedProperty.IsManagedReference())
 				throw isNotManagedReferenceException;
 			
@@ -49,18 +61,17 @@ namespace CREATIVE.SandboxAssets
 			
 			String[] serializedPropertyTypeInfo = serializedProperty.managedReferenceFullTypename.Split();
 
-			return managedReferenceType.IsAssignableFrom
-			(
-				Type.GetType
-				(
-					serializedPropertyTypeInfo[1] + ", " +
-					serializedPropertyTypeInfo[0]
-				)
-			);
+			return
+				Type
+					.GetType(serializedPropertyTypeInfo[1] + ", " + serializedPropertyTypeInfo[0])
+					.IsAssignableFrom(managedReferenceType);
 		}
 
 		public static bool ManagedReferenceEquals(this SerializedProperty serializedProperty, SerializedProperty otherSerializedProperty)
 		{
+			if (serializedProperty == null)
+				throw new ArgumentNullException(nameof(serializedProperty));
+			
 			if (otherSerializedProperty == null)
 				throw new ArgumentNullException(nameof(otherSerializedProperty));
 			
@@ -76,6 +87,9 @@ namespace CREATIVE.SandboxAssets
 
 		public static void SetManagedReference(this SerializedProperty serializedProperty, SerializedProperty otherSerializedProperty)
 		{
+			if (serializedProperty == null)
+				throw new ArgumentNullException(nameof(serializedProperty));
+			
 			if (otherSerializedProperty == null)
 				throw new ArgumentNullException(nameof(otherSerializedProperty));
 			

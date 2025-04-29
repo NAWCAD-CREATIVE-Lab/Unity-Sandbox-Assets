@@ -13,9 +13,49 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 	public class TreeGraphViewInvokerNode : TreeGraphViewNode
 	{
 		public readonly Port NextNodePort;
+		
+		public InvokerNode InvokerNode
+		{
+			get
+			{
+				if (ReadOnly)
+					return Node as InvokerNode;
+				
+				return NodeProperty.managedReferenceValue as InvokerNode;
+			}
+		}
 
 		List<VisualElement> eventContainers = new List<VisualElement>();
 
+		void setup()
+		{
+			NextNodePort.portName = null;
+			outputContainer.Add(NextNodePort);
+
+			if (!ReadOnly)
+			{
+				Button addEventButton = new Button();
+				addEventButton.text = "Add Event";
+				addEventButton.clicked += () => AddEvent();
+				extensionContainer.Add(addEventButton);
+			}
+
+			RefreshEvents();
+
+			RefreshExpandedState();
+		}
+
+		public TreeGraphViewInvokerNode(TreeGraphView treeGraphView, InvokerNode invokerNode)
+			: base(treeGraphView, invokerNode, "Invoker")
+		{
+			NextNodePort =
+				InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Node));
+			
+			NextNodePort.SetEnabled(false);
+			
+			setup();
+		}
+		
 		public TreeGraphViewInvokerNode(TreeGraphView treeGraphView, SerializedProperty invokerProperty)
 			: base(treeGraphView, invokerProperty, "Invoker")
 		{
@@ -28,19 +68,8 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			
 			NextNodePort =
 				InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Node));
-			NextNodePort.portName = null;
-			outputContainer.Add(NextNodePort);
 			
-			Button addEventButton = new Button();
-			addEventButton.text = "Add Event";
-			addEventButton.clicked += () => AddEvent();
-			extensionContainer.Add(addEventButton);
-
-			eventContainers = new List<VisualElement>();
-
-			RefreshEvents();
-
-			RefreshExpandedState();
+			setup();
 		}
 
 		void RefreshEvents()
@@ -49,12 +78,37 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 				eventContainer.RemoveFromHierarchy();
 			
 			eventContainers.Clear();
+
+			if (ReadOnly)
+				foreach (EventToInvoke eventToInvoke in InvokerNode.EventsToInvoke)
+					AddEvent(eventToInvoke);
 			
-			SerializedProperty eventsToInvokeProperty =
-				NodeProperty.FindPropertyRelative(nameof(InvokerNode.EventsToInvoke));
-			
-			for (int i=0; i<eventsToInvokeProperty.arraySize; i++)
-				AddEvent(eventsToInvokeProperty.GetArrayElementAtIndex(i));
+			else
+			{
+				SerializedProperty eventsToInvokeProperty =
+					NodeProperty.FindPropertyRelative(nameof(InvokerNode.EventsToInvoke));
+				
+				for (int i=0; i<eventsToInvokeProperty.arraySize; i++)
+					AddEvent(eventsToInvokeProperty.GetArrayElementAtIndex(i));
+			}
+		}
+
+		void AddEvent(EventToInvoke eventToInvoke)
+		{
+			VisualElement eventContainer = new VisualElement();
+			eventContainer.style.flexDirection = FlexDirection.Row;
+
+			ObjectField sandboxEventField = new ObjectField();
+			sandboxEventField.objectType = typeof(SandboxEvent);
+			sandboxEventField.allowSceneObjects = false;
+			sandboxEventField.value = eventToInvoke.Event;
+			sandboxEventField.SetEnabled(false);
+
+			eventContainer.Add(sandboxEventField);
+
+			extensionContainer.Add(eventContainer);
+
+			eventContainers.Add(eventContainer);
 		}
 
 		void AddEvent(SerializedProperty eventToInvokeProperty = null)
@@ -90,7 +144,9 @@ namespace CREATIVE.SandboxAssets.BehaviorTrees
 			ObjectField sandboxEventField = new ObjectField();
 			sandboxEventField.objectType = typeof(SandboxEvent);
 			sandboxEventField.allowSceneObjects = false;
+
 			sandboxEventField.BindProperty(eventToInvokeProperty.FindPropertyRelative(nameof(EventToInvoke.Event)));
+			
 			eventContainer.Add(sandboxEventField);
 
 			extensionContainer.Add(eventContainer);
