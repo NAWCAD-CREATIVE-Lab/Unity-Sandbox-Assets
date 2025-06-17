@@ -3,19 +3,21 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 
-namespace CREATIVE.SandboxAssets.BehaviorTrees
+namespace CREATIVE.SandboxAssets.Editor.BehaviorTrees
 {
+	/**
+		An editor window for BehaviorTree objects.
+
+		Essentially just contains a TreeView panel.
+	*/
 	public class TreeEditor : EditorWindow
 	{
 		[MenuItem("Window/CREATIVE Lab/Sandbox Assets/Behavior Tree Editor")]
-		public static void OpenWindow()
-		{
-			GetWindow<TreeEditor>().titleContent = new GUIContent("Behavior Tree");
-		}
+		public static void OpenWindow() => GetWindow<TreeEditor>().titleContent = new GUIContent("Behavior Tree");
 
 		void CreateGUI()
 		{
-			TreeGraphView treeView = new TreeGraphView();
+			TreeView treeView = new TreeView();
 
 			treeView.style.flexGrow = new StyleFloat(1f);
 

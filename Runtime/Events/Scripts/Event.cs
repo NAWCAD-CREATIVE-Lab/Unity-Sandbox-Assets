@@ -10,6 +10,9 @@ using UnityEditor;
 
 namespace CREATIVE.SandboxAssets.Events
 {
+#if UNITY_EDITOR
+	[CreateAssetMenu(fileName = "Event", menuName = "NAWCAD CREATIVE Lab/Sandbox Assets/Event")]
+#endif
 	/**
 		An subscribable event-like interface for Unity Objects.
 
@@ -25,22 +28,19 @@ namespace CREATIVE.SandboxAssets.Events
 
 		Each event can be invoked optionally with another object as an argument.
 	*/
-#if UNITY_EDITOR
-	[CreateAssetMenu(fileName = "Event", menuName = "NAWCAD CREATIVE Lab/Sandbox Assets/Event")]
-#endif
 	public class SandboxEvent : ScriptableObject
 	{
-		[field: SerializeField] UnityEngine.Object			ExclusiveInvokerFromAssetFolder	= null;
-		[field: SerializeField] List<UnityEngine.Object>	InvokersFromAssetFolder			= new List<UnityEngine.Object>();
-		[field: SerializeField] List<AssetListener>			ListenersFromAssetFolder		= new List<AssetListener>();
+		[field: SerializeField] UnityEngine.Object ExclusiveInvokerFromAssetFolder = null;
+		[field: SerializeField] List<UnityEngine.Object> InvokersFromAssetFolder = new List<UnityEngine.Object>();
+		[field: SerializeField] List<AssetListener> ListenersFromAssetFolder = new List<AssetListener>();
 
-		List<GameObject>	invokersFromScene	= new List<GameObject>();
-		List<Listener>		listenersFromScene	= new List<Listener>();
-		
-		bool			invokeLock					= false;
-		List<Listener>	listenersFromSceneToAdd		= new List<Listener>();
-		List<Listener>	listenersFromSceneToRemove	= new List<Listener>();
-		
+		List<GameObject> invokersFromScene = new List<GameObject>();
+		List<Listener> listenersFromScene = new List<Listener>();
+
+		bool invokeLock = false;
+		List<Listener> listenersFromSceneToAdd = new List<Listener>();
+		List<Listener> listenersFromSceneToRemove = new List<Listener>();
+
 #if UNITY_EDITOR
 		event Action repaintEditor;
 		
@@ -122,7 +122,7 @@ namespace CREATIVE.SandboxAssets.Events
 			}
 		}
 #endif
-		
+
 		/**
 			Checks to make sure that the invoking object is authorized to invoke
 			this event, and calls the Invoke method of all Listener
@@ -141,11 +141,11 @@ namespace CREATIVE.SandboxAssets.Events
 			{
 				if (invoker == null)
 					throw new ArgumentNullException("invoker");
-				
+
 				if
 				(
-					invoker!=ExclusiveInvokerFromAssetFolder											&&
-					(!(invoker is GameObject) || !invokersFromScene.Contains(invoker as GameObject))	&&
+					invoker != ExclusiveInvokerFromAssetFolder &&
+					(!(invoker is GameObject) || !invokersFromScene.Contains(invoker as GameObject)) &&
 					!InvokersFromAssetFolder.Contains(invoker)
 				)
 					throw new InvalidOperationException
@@ -154,30 +154,30 @@ namespace CREATIVE.SandboxAssets.Events
 						"attempted to invoke the \"" + name + "\" Sandbox Event " +
 						"but has not previously registered as an invoker"
 					);
-				
+
 				String debugMessage =
-					"\tSandbox Event:\t<b>"	+ name			+ "</b>\n" +
-					"\t\tInvoker:\t\t"		+ invoker.name;
-				
-				if (target!=null)
+					"\tSandbox Event:\t<b>" + name + "</b>\n" +
+					"\t\tInvoker:\t\t" + invoker.name;
+
+				if (target != null)
 					debugMessage += "\n\t\tTarget:\t\t" + target.name;
-				
+
 				Debug.Log(debugMessage);
 
 				invokeLock = true;
 
 				foreach (Listener listenerFromScene in listenersFromScene)
 				{
-					if (target==null)
+					if (target == null)
 					{
 						if (listenerFromScene.Invoke())
 							listenersFromSceneToRemove.Add(listenerFromScene);
 					}
-					
+
 					else if (listenerFromScene.Invoke(target))
 						listenersFromSceneToRemove.Add(listenerFromScene);
 				}
-				
+
 				List<AssetListener> listenersFromAssetFolderToRemove = new List<AssetListener>();
 				foreach (AssetListener listenerFromAssetFolder in ListenersFromAssetFolder)
 				{
@@ -187,12 +187,12 @@ namespace CREATIVE.SandboxAssets.Events
 							"Cannot invoke listener \"" + listenerFromAssetFolder.name + "\"" +
 							" as it is not a listener for this event."
 						);
-					
+
 					else if (target == null)
 					{
 						if (listenerFromAssetFolder.Invoke(target))
 							listenersFromAssetFolderToRemove.Add(listenerFromAssetFolder);
-						
+
 					}
 
 					else if (listenerFromAssetFolder.Invoke(target))
@@ -201,13 +201,13 @@ namespace CREATIVE.SandboxAssets.Events
 
 				foreach (Listener listenerFromSceneToRemove in listenersFromSceneToRemove)
 					listenersFromScene.Remove(listenerFromSceneToRemove);
-				
+
 				foreach (Listener listenerFromSceneToAdd in listenersFromSceneToAdd)
 					listenersFromScene.Add(listenerFromSceneToAdd);
-				
+
 				foreach (AssetListener listenerFromAssetFolderToRemove in listenersFromAssetFolderToRemove)
 					ListenersFromAssetFolder.Remove(listenerFromAssetFolderToRemove);
-				
+
 				invokeLock = false;
 
 #if UNITY_EDITOR
@@ -239,23 +239,23 @@ namespace CREATIVE.SandboxAssets.Events
 			{
 				if (invoker == null)
 					throw new ArgumentNullException("invoker");
-				
+
 				/*
 					Skip adding the invoker if it's a prefab
 
 					Unity treats them as GameObjects and they cause the event
 					to be invoked twice
 				*/
-				if (invoker.scene.name!=null && invoker.scene.rootCount!=0)
+				if (invoker.scene.name != null && invoker.scene.rootCount != 0)
 				{
-					if (ExclusiveInvokerFromAssetFolder!=null)
+					if (ExclusiveInvokerFromAssetFolder != null)
 						throw new InvalidOperationException
 						(
 							"Object \"" + invoker.name + "\" " +
 							"attempted to add itself as an invoker to the \"" + name + "\" Sandbox Event " +
 							"but object \"" + ExclusiveInvokerFromAssetFolder.name + "\" already has exclusive rights."
 						);
-					
+
 					invokersFromScene.Add(invoker as GameObject);
 				}
 
@@ -274,15 +274,15 @@ namespace CREATIVE.SandboxAssets.Events
 		{
 			if (invoker == null)
 				throw new ArgumentNullException("invoker");
-			
-			if(!invokersFromScene.Contains(invoker))
+
+			if (!invokersFromScene.Contains(invoker))
 				throw new InvalidOperationException
 				(
 					"Object \"" + invoker.name + "\" " +
 					"attempted to drop itself as an invoker to the \"" + name + "\" Sandbox Event " +
 					"but has not previously registered as an invoker"
 				);
-			
+
 			invokersFromScene.Remove(invoker as GameObject);
 
 #if UNITY_EDITOR
@@ -304,7 +304,7 @@ namespace CREATIVE.SandboxAssets.Events
 			{
 				if (listener == null)
 					throw new ArgumentNullException("listener");
-				
+
 				if (listener.Event == null)
 					throw new ArgumentException
 					(
@@ -313,7 +313,7 @@ namespace CREATIVE.SandboxAssets.Events
 						"but the Event field of the Listener is null.",
 						"listener"
 					);
-				
+
 				else if (listener.Event != this)
 					throw new ArgumentException
 					(
@@ -323,7 +323,7 @@ namespace CREATIVE.SandboxAssets.Events
 						"instead of this one.",
 						"listener"
 					);
-				
+
 				if (listener is AssetListener)
 					throw new ArgumentException
 					(
@@ -333,7 +333,7 @@ namespace CREATIVE.SandboxAssets.Events
 						"This listener must be added through ListenersFromAssetFolder.",
 						"listener"
 					);
-				
+
 				else if (listener.ListeningObject == null)
 					throw new ArgumentException
 					(
@@ -341,7 +341,7 @@ namespace CREATIVE.SandboxAssets.Events
 						"but the ListeningObject field of the Listener is null.",
 						"listener"
 					);
-				
+
 				else if (!(listener.ListeningObject is GameObject))
 					throw new ArgumentException
 					(
@@ -350,12 +350,12 @@ namespace CREATIVE.SandboxAssets.Events
 						"but the listener does not appear to be in the Scene or the Asset Folder.",
 						"listener"
 					);
-				
+
 				else
 				{
 					GameObject listeningObject = listener.ListeningObject as GameObject;
 
-					if (listeningObject.scene.name!=null && listeningObject.scene.rootCount!=0)
+					if (listeningObject.scene.name != null && listeningObject.scene.rootCount != 0)
 					{
 						if (invokeLock)
 							listenersFromSceneToAdd.Add(listener);
@@ -378,7 +378,7 @@ namespace CREATIVE.SandboxAssets.Events
 		{
 			if (listener == null)
 				throw new ArgumentNullException("listener");
-			
+
 			if (listener.Event == null)
 				throw new ArgumentException
 				(
@@ -387,7 +387,7 @@ namespace CREATIVE.SandboxAssets.Events
 					"but the Event field of the Listener is null.",
 					"listener"
 				);
-			
+
 			if (listener.Event != this)
 				throw new ArgumentException
 				(
@@ -397,18 +397,18 @@ namespace CREATIVE.SandboxAssets.Events
 					"instead of this one.",
 					"listener"
 				);
-			
+
 			if (!listenersFromScene.Contains(listener))
 				throw new ArgumentException
 				(
-					listener.ListeningObject==null?
+					listener.ListeningObject == null ?
 					"An object " :
 					"Object \"" + listener.ListeningObject.name + "\" " +
 					"attempted to drop a listener from the \"" + name + "\" Sandbox Event " +
 					"but has not previously added the listener provided.",
 					"listener"
 				);
-			
+
 			if (invokeLock)
 				listenersFromSceneToRemove.Add(listener);
 			else

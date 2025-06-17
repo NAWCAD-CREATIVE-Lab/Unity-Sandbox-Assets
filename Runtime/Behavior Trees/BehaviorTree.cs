@@ -10,164 +10,82 @@ using UnityEngine.UIElements;
 
 namespace CREATIVE.SandboxAssets.BehaviorTrees
 {
+	/**
+		A serialized collection of linked Node objects that can be converted 
+		into a runnable Graph of behavior.
+
+		Node types supported in a behavior Graph can be freely created or
+		extended.
+	*/
 #if UNITY_EDITOR
 	[type: CreateAssetMenu(fileName = "Behavior Tree", menuName = "NAWCAD CREATIVE Lab/Sandbox Assets/Behavior Tree")]
 #endif
 	public class BehaviorTree : ScriptableObject
 	{
-		[SerializeReference]
-		public List<Node> Nodes = new List<Node>();
-
-		[SerializeReference]
-		public Node RootNode = null;
-
-		public void CleanCloneFrom(BehaviorTree source)
-		{
-			if (source == null)
-				throw new ArgumentNullException(nameof(source));
+		/**
+			An serialized List of linked Node objects.
 			
-			if (source.Nodes == null)
-				throw new InvalidOperationException(nameof(source.Nodes) + " is null.");
-			
-			if (source.RootNode == null)
-				throw new InvalidOperationException(nameof(source.RootNode) + " is null.");
-			
-			if (!source.Nodes.Contains(source.RootNode))
-				throw new InvalidOperationException(nameof(source.Nodes) + " does not contain the Root Node.");
+			May be empty and may contain null references or duplicates.
+		*/
+		[field: SerializeReference]
+		public List<Node> Nodes;
 
-#if UNITY_EDITOR
-			EntryNodePosition = new Vector2() { x=source.EntryNodePosition.x, y=source.EntryNodePosition.y };
-#endif
+		/**
+			The Node that should be evaluated first. May be null.
+		*/
+		[field: SerializeReference]
+		public Node RootNode;
 
-			Nodes = new List<Node>(source.Nodes);
+		/**
+			The position where the node should be displayed in the Behavior
+			Tree that points to the RootNode.
 
-			Nodes.Remove(source.RootNode);
-
-			Nodes.Insert(0, source.RootNode);
-			
-			Nodes = Node.CleanCloneList(Nodes);
-			
-			RootNode = Nodes[0];
-		}
-
-#if UNITY_EDITOR
+			Only relevant in the Unity Editor. 
+		*/
 		public Vector2 EntryNodePosition;
+
+		/**
+			Attempts to create a Graph object from this BehaviorTree.
+			
+			May throw exceptions if this BehaviorTree does not represent a
+			valid Graph.
+
+			@param runningObject The GameObject that should be running the
+			created Graph
+
+			@param currentNodeChanged An Action that will be invoked immediately
+			before a new node begins to be evaluated. Will not be invoked before
+			the root node is evaluated.
+
+			@param stopped An Action that will be invoked if a node
+			completes evaluation and has no subsequent node to evaluate.
+
+			@param teardown A reference that will be populated with a method
+			that must be called after the created Graph is no longer being used,
+			in order to perform necessary final configuration.
+		*/
+		public Graph CreateGraph
+		(
+			GameObject runningObject,
+			Action<Node.IRecord<Node>> currentNodeChanged,
+			Action stopped,
+			out Action teardown
+		) =>
+			new Graph(Nodes, RootNode, runningObject, currentNodeChanged, stopped, out teardown);
+
+#if UNITY_EDITOR
 		
+		/**
+			A custom Unity inspector for BehaviorTree objects.
+
+			Renders a blank pane, as Behavior Trees should be edited with the
+			Behavior Tree Editor window.
+		*/
 		[type: CustomEditor(typeof(BehaviorTree))]
 		public class Inspector : Editor
 		{
 			public override VisualElement CreateInspectorGUI() => new VisualElement();
 		}
-		
-		public static SerializedProperty AddListenerNode(SerializedObject serializedTree)
-		{
-			if (serializedTree == null)
-				throw new ArgumentNullException(nameof(serializedTree));
-			
-			if (!(serializedTree.targetObject is BehaviorTree))
-				throw new ArgumentException
-					(nameof(serializedTree), nameof(serializedTree) + " does not represent a Behavior Tree.");
-			
-			SerializedProperty nodesProperty = serializedTree.FindProperty(nameof(Nodes));
-
-			SerializedProperty newListenerProperty = nodesProperty.GetArrayElementAtIndex(nodesProperty.arraySize++);
-
-			newListenerProperty.managedReferenceValue = new ListenerNode();
-
-			serializedTree.ApplyModifiedProperties();
-
-			return newListenerProperty;
-		}
-
-		public static SerializedProperty AddInvokerNode(SerializedObject serializedTree)
-		{
-			if (serializedTree == null)
-				throw new ArgumentNullException(nameof(serializedTree));
-			
-			if (!(serializedTree.targetObject is BehaviorTree))
-				throw new ArgumentException
-					(nameof(serializedTree), nameof(serializedTree) + " does not represent a Behavior Tree.");
-			
-			SerializedProperty nodesProperty = serializedTree.FindProperty(nameof(Nodes));
-
-			SerializedProperty newInvokerProperty = nodesProperty.GetArrayElementAtIndex(nodesProperty.arraySize++);
-
-			newInvokerProperty.managedReferenceValue = new InvokerNode();
-
-			serializedTree.ApplyModifiedProperties();
-
-			return newInvokerProperty;
-		}
-
-		public static bool RemoveNode(SerializedProperty nodeProperty)
-		{
-			if (nodeProperty == null)
-				throw new ArgumentNullException(nameof(nodeProperty));
-			
-			if (!(nodeProperty.IsManagedReference() && nodeProperty.ManagedReferenceIsOfType(typeof(Node))))
-				throw new ArgumentException
-					(nameof(nodeProperty), nameof(nodeProperty) + " does not represent a Behavior Tree Node.");
-
-			if (!nodeProperty.DeleteCommand())
-				return false;
-
-			nodeProperty.serializedObject.ApplyModifiedProperties();
-
-			return true;
-		}
-
-		public static bool RemoveNodes(IEnumerable<SerializedProperty> nodeProperties)
-		{
-			if (nodeProperties == null)
-				throw new ArgumentNullException(nameof(nodeProperties));
-			
-			SerializedObject serializedTree = null;
-			
-			List<long> managedReferenceIDs = new List<long>();
-
-			foreach (SerializedProperty nodeProperty in nodeProperties)
-			{
-				if (!(nodeProperty.IsManagedReference() && nodeProperty.ManagedReferenceIsOfType(typeof(Node))))
-					throw new ArgumentException
-					(
-						nameof(nodeProperties),
-						"A Serialized Property in " +
-						nameof(nodeProperties) +
-						" does not represent a Behavior Tree Node."
-					);
-				
-				if (serializedTree == null)
-					serializedTree = nodeProperty.serializedObject;
-				
-				else if (nodeProperty.serializedObject != serializedTree)
-					throw new ArgumentException
-					(
-						nameof(nodeProperties),
-						nameof(nodeProperties) +
-						"Contains Serialized Properties representing Nodes from different Behavior Trees."
-					);
-				
-				managedReferenceIDs.Add(nodeProperty.managedReferenceId);
-			}
-
-			if (managedReferenceIDs.Count > 0)
-			{
-				SerializedProperty nodesProperty = serializedTree.FindProperty(nameof(Nodes));
-
-				for (int i=(nodesProperty.arraySize-1); i>=0; i--)
-				{
-					SerializedProperty nodeProperty = nodesProperty.GetArrayElementAtIndex(i);
-
-					if (managedReferenceIDs.Contains(nodeProperty.managedReferenceId))
-						if (!nodeProperty.DeleteCommand())
-							return false;
-				}
-
-				serializedTree.ApplyModifiedProperties();
-			}
-
-			return true;
-		}
 #endif
-	}
+		}
 }
