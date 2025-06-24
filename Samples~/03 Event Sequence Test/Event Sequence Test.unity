@@ -346,9 +346,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4d16a34f4d4d224ab303639c204fd12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CursorMoveActions:
-  - {fileID: -8825141139254287241, guid: 1cc8d64f6ffffec48a989e710823ba0d, type: 3}
-  - {fileID: 4487498304953308215, guid: 1cc8d64f6ffffec48a989e710823ba0d, type: 3}
+  LookScreenPosition: {fileID: 3153540119620710263, guid: 1cc8d64f6ffffec48a989e710823ba0d, type: 3}
   InteractAction: {fileID: -1076694887501793002, guid: 1cc8d64f6ffffec48a989e710823ba0d, type: 3}
   InteractEvent: {fileID: 11400000, guid: 5e67eb86178b8c6448fb27c7e7edd5f6, type: 2}
   LookEvent: {fileID: 11400000, guid: 0e3c0bb84da6b7c43abca09f48ab4b41, type: 2}
@@ -2104,7 +2102,6 @@ MonoBehaviour:
     EventsToInvoke:
     - Event: {fileID: 11400000, guid: 9ad9ea62eb39d6b4997d5700abba521d, type: 2}
       Target: {fileID: 273915304}
-  CurrentStepIndex: -1
 --- !u!1 &1579077469
 GameObject:
   m_ObjectHideFlags: 0

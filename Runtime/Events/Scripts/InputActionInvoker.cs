@@ -86,21 +86,18 @@ namespace CREATIVE.SandboxAssets.Events
 			{
 				if (registeredActionStage == InputActionStage.Started)
 					registeredAction.action.started -= Invoke;
-				
+
 				if (registeredActionStage == InputActionStage.Performed)
 					registeredAction.action.performed -= Invoke;
-				
+
 				if (registeredActionStage == InputActionStage.Cancelled)
 					registeredAction.action.canceled -= Invoke;
-			}
 
-			if (registeredEvent != null)
-			{	
 				registeredEvent.DropInvoker(gameObject);
 				registeredEvent = null;
+				
+				registered = false;
 			}
-
-			registered = false;
 		}
 
 		void Invoke(InputAction.CallbackContext context) => registeredEvent.Invoke(gameObject);
