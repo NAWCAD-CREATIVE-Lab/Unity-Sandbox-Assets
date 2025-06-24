@@ -13,12 +13,12 @@ using UnityEditor;
 namespace CREATIVE.SandboxAssets.Events
 {
 	/**
-		This class invokes events when the cursor passes over, and interacts
-		with, objects in the scene.
+		This class invokes events when the user looks at, and interacts with,
+		objects in the scene.
 
-		UI and physics raycasts are performed on every frame from the center of
-		the cursor position and a Sandbox Event is invoked if the user begins
-		looking at something new.
+		UI and physics raycasts are performed on every frame from the screen
+		position where the user is looking, and a Sandbox Event is invoked if
+		the user begins looking at something new.
 
 		Both world-space and screen-space UI panels will always be detected, but
 		3D objects will only be detected if they have a collider component.
@@ -28,16 +28,17 @@ namespace CREATIVE.SandboxAssets.Events
 	*/
 	[type: RequireComponent(typeof(Camera))]
 	[type: RequireComponent(typeof(PhysicsRaycaster))]
-	public class CursorInvoker : MonoBehaviour
+	public class LookInteractInvoker : MonoBehaviour
 	{
 		/**
-			The input that will indicate the cursor has moved.
+			An InputAction that should supply a Vector2 representing the screen
+			coordinates the user is focussing on.
 
 			Raycasts to check for focus on a new object will only be performed
-			after these actions.
+			when this InputAction is performed.
 		*/
-		[field: SerializeField] List<InputActionReference> CursorMoveActions			= new List<InputActionReference>();
-								List<InputActionReference> registeredCursorMoveActions	= new List<InputActionReference>();
+		[field: SerializeField] InputActionReference LookScreenPosition				= null;
+								InputActionReference registeredLookScreenPosition	= null;
 		
 		/**
 			The input that will be understood as "interacting" with an object in
@@ -76,19 +77,19 @@ namespace CREATIVE.SandboxAssets.Events
 		event Action repaintEditor;
 		
 		/**
-			Custom editor for the SandboxEventCursorInvoker Monobehaviour 
+			Custom editor for the LookInteractInvoker Monobehaviour 
 		*/
-		[type: CustomEditor(typeof(CursorInvoker))]
+		[type: CustomEditor(typeof(LookInteractInvoker))]
 		class Editor : UnityEditor.Editor
 		{
-			void OnEnable()		=> (target as CursorInvoker).repaintEditor += Repaint;
-			void OnDisable()	=> (target as CursorInvoker).repaintEditor -= Repaint;
+			void OnEnable()		=> (target as LookInteractInvoker).repaintEditor += Repaint;
+			void OnDisable()	=> (target as LookInteractInvoker).repaintEditor -= Repaint;
 			
 			public override void OnInspectorGUI()
 			{
 				serializedObject.Update();
 
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(CursorMoveActions)));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(LookScreenPosition)));
 
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(InteractAction)));
 
@@ -123,36 +124,36 @@ namespace CREATIVE.SandboxAssets.Events
 
 			if (Application.isPlaying && isActiveAndEnabled)
 			{
+				if (LookScreenPosition == null)
+					throw new InvalidOperationException
+						(nameof(LookScreenPosition) + " must be populated prior to start of scene.");
+				
+				if (InteractAction == null)
+					throw new InvalidOperationException
+						(nameof(InteractAction) + " must be populated prior to start of scene.");
+
 				if (InteractEvent == null)
-					throw new InvalidOperationException("InteractEvent Must be populated prior to start of scene.");
+					throw new InvalidOperationException
+						(nameof(InteractEvent) + " must be populated prior to start of scene.");
 				
 				if (LookEvent == null)
-					throw new InvalidOperationException("ObjectLookEvent Must be populated prior to start of scene.");
+					throw new InvalidOperationException
+						(nameof(LookEvent) + " must be populated prior to start of scene.");
 					
 				if (Application.isPlaying && isActiveAndEnabled)
 				{
-					foreach (InputActionReference inputActionReference in CursorMoveActions)
-					{
-						if (inputActionReference!=null)
-						{
-							registeredCursorMoveActions.Add(inputActionReference);
-							inputActionReference.action.performed += Look;
-						}
-					}
+					registeredLookScreenPosition = LookScreenPosition;
+					registeredLookScreenPosition.action.performed += Look;
 
-					if (registeredCursorMoveActions.Count == 0)
-						throw new InvalidOperationException
-							("CursorMoveActions must be populated prior to the start of the scene.");
-					
+					registeredInteractAction = InteractAction;
+					registeredInteractAction.action.performed += Interact;
+
 					registeredInteractEvent = InteractEvent;
 					registeredInteractEvent.AddInvoker(gameObject);
 
 					registeredLookEvent = LookEvent;
 					registeredLookEvent.AddInvoker(gameObject);
-					
-					registeredInteractAction = InteractAction;
-					registeredInteractAction.action.performed += Interact;
-					
+
 					registered = true;
 				}
 			}
@@ -178,9 +179,11 @@ namespace CREATIVE.SandboxAssets.Events
 				registeredInteractAction = null;
 			}
 
-			foreach (InputActionReference inputActionReference in registeredCursorMoveActions)
-				inputActionReference.action.performed -= Look;
-			registeredCursorMoveActions.Clear();
+			if (registeredLookScreenPosition != null)
+			{
+				registeredLookScreenPosition.action.performed -= Look;
+				registeredLookScreenPosition = null;
+			}
 			
 			registered = false;
 		}
@@ -202,7 +205,7 @@ namespace CREATIVE.SandboxAssets.Events
 			*/
 			EventSystem.current.RaycastAll
 			(
-				new PointerEventData(EventSystem.current) { position = Mouse.current.position.ReadValue() },
+				new PointerEventData(EventSystem.current) { position = context.ReadValue<Vector2>() },
 				raycastResults
 			);
 
