@@ -48,20 +48,20 @@ To listen for a Sandbox Event and perform operations when it happens, add a [Sce
 
 An [Asset Listener](Runtime/Events/Scripts/AssetListener.cs) can also be used in the same way, except it is instantiated in the Asset folder instead of the scene. This would be used to configure operations that should occur regardless of what scene might currently be playing.
 
-A [Sequence](Runtime/Behavior&#32;Trees/Event&#32;Nodes/Sequence.cs) component can also be added to an object in a scene to program Events in a linear fashion.
+A [Sequence](Runtime/Behavior%20Trees/Event%20Nodes/Sequence.cs) component can also be added to an object in a scene to program Events in a linear fashion.
 
 Three Event objects are provided by default in this package, as they are the most commonly used (although optional): 
-- [Scene Started](Runtime/Events/Scene&#32;Started.asset)
-- [User Interacted](Runtime/Events/User&#32;Interacted.asset)
-- [User Looked](Runtime/Events/User&#32;Looked.asset)
+- [Scene Started](Runtime/Events/Scene%20Started.asset)
+- [User Interacted](Runtime/Events/User%20Interacted.asset)
+- [User Looked](Runtime/Events/User%20Looked.asset)
 
 ### Behavior Trees
 
 Behavior Trees are essentially state machines created in the in the Asset folder that interact with other Sandbox Assets. These operate in a very similar way to Unity's standard Animator, but without the overhead of actual animations. The trees are viewable in a custom editor panel accessible from the "Window" dropdown. From this Behavior Tree Editor window (with a Behavior Tree asset selected) nodes can be added, connected, and arranged freely on an endless background. Once a Behavior Tree has been created, it can be run in a scene by referencing it from a [Behavior Tree Runner]("Runtime/Behavior Trees/BehaviorTreeRunner.cs") component.
 
 The types of nodes that can be added to a Behavior Tree include:
-- [Listener Node](Runtime/Behavior&#32;Trees/Event&#32;Nodes/Listener&#32;Node/ListenerNode.cs)
-- [Invoker Node](Runtime/Behavior&#32;Trees/Event&#32;Nodes/Invoker&#32;Node/InvokerNode.cs)
+- [Listener Node](Runtime/Behavior%20Trees/Event%20Nodes/Listener%20Node/ListenerNode.cs)
+- [Invoker Node](Runtime/Behavior%20Trees/Event%20Nodes/Invoker%20Node/InvokerNode.cs)
 
 ### Items
 
