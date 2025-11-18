@@ -48,6 +48,8 @@ To listen for a Sandbox Event and perform operations when it happens, add a [Sce
 
 An [Asset Listener](Runtime/Events/Scripts/AssetListener.cs) can also be used in the same way, except it is instantiated in the Asset folder instead of the scene. This would be used to configure operations that should occur regardless of what scene might currently be playing.
 
+A [Sequence]("Runtime/Behavior Trees/Event Nodes/Sequence.cs") component can also be added to an object in a scene to program Events in a linear fashion.
+
 Three Event objects are provided by default in this package, as they are the most commonly used (although optional): 
 - [Scene Started]("Runtime/Events/Scene Started.asset")
 - [User Interacted]("Runtime/Events/User Interacted.asset")
